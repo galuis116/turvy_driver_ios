@@ -17,7 +17,7 @@
   <uses-permission android:name="android.permission.WAKE_LOCK"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
   <application android:name=".MainApplication" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:allowBackup="true" android:theme="@style/AppTheme" android:usesCleartextTraffic="true">
-    <meta-data android:name="MAPBOX_ACCESS_TOKEN" android:value="pk.eyJ1IjoiamttaWxsYSIsImEiOiJjbDFuYzZqNXowN2ZqM2Rudm1pcHFvMWg3In0.Dn07wvXuaLZTxhBY_fiPFg"/>
+    <meta-data android:name="MAPBOX_ACCESS_TOKEN" android:value="sk.eyJ1IjoiamttaWxsYSIsImEiOiJjbGlzM3JtMmswczN5M2NxdmR2cDB3bTNuIn0.vBo7vBXjCnpxsyHAwe4jZw"/>
     <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyAr2ESV30J7hFsOJ5Qjaa96u9ADSRX6_Sk"/>
     <meta-data android:name="expo.modules.notifications.default_notification_color" android:resource="@color/notification_icon_color"/>
     <meta-data android:name="expo.modules.notifications.default_notification_icon" android:resource="@drawable/notification_icon"/>

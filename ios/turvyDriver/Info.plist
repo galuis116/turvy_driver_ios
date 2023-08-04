@@ -17,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.7</string>
+	<string>1.0.9</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -38,13 +38,13 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>8</string>
+	<string>109</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>MBXAccessToken</key>
-	<string>pk.eyJ1IjoiamttaWxsYSIsImEiOiJjbDFuYzZqNXowN2ZqM2Rudm1pcHFvMWg3In0.Dn07wvXuaLZTxhBY_fiPFg</string>
+	<string>sk.eyJ1IjoiamttaWxsYSIsImEiOiJjbGlzM3JtMmswczN5M2NxdmR2cDB3bTNuIn0.vBo7vBXjCnpxsyHAwe4jZw</string>
 	<key>MGLMapboxAccessToken</key>
-	<string>pk.eyJ1IjoiamttaWxsYSIsImEiOiJjbDFuYzZqNXowN2ZqM2Rudm1pcHFvMWg3In0.Dn07wvXuaLZTxhBY_fiPFg</string>
+	<string>sk.eyJ1IjoiamttaWxsYSIsImEiOiJjbGlzM3JtMmswczN5M2NxdmR2cDB3bTNuIn0.vBo7vBXjCnpxsyHAwe4jZw</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -63,11 +63,11 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Allow $(PRODUCT_NAME) uses the camera to take your profile picture.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Turvy Driver collects background location when using a third party map like google or waze for navigation or app in background while the trip is running, then collects background location for updating driver location on rider's map even when the app is running in background.</string>
+	<string>Turvy Driver collects background location when using a third party map like google or waze for navigation or app in background while the trip is running, then collects background location for updating driver location on rider&apos;s map even when the app is running in background.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Turvy Driver collects background location when using a third party map like google or waze for navigation or app in background while the trip is running, then collects background location for updating driver location on rider's map even when the app is running in background.</string>
+	<string>Turvy Driver collects background location when using a third party map like google or waze for navigation or app in background while the trip is running, then collects background location for updating driver location on rider&apos;s map even when the app is running in background.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Turvy Driver collects background location when using a third party map like google or waze for navigation or app in background while the trip is running, then collects background location for updating driver location on rider's map even when the app is running in background.</string>
+	<string>Turvy Driver collects background location when using a third party map like google or waze for navigation or app in background while the trip is running, then collects background location for updating driver location on rider&apos;s map even when the app is running in background.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Allow $(PRODUCT_NAME) to access your microphone</string>
 	<key>NSPhotoLibraryUsageDescription</key>
