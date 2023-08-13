@@ -1184,11 +1184,14 @@ export default class BookingMap extends Component {
     //console.log("BOOKING CANCEL ",data);
     let bookId = this.state.bookrequest.id;
     if (data.book_id === bookId) {
-      this.setState({ riderCancel: true });
+      // this.setState({ riderCancel: true });
       AsyncStorage.removeItem("running_book_id");
       this.alertTone();
       db.collection("driver_locations").doc(this.state.driverId).update({
         isBusy: "no",
+      });
+      this.props.navigation.replace("MapViewFirst", {
+        showRiderCancleTrip: true,
       });
     }
   };
@@ -1962,7 +1965,9 @@ export default class BookingMap extends Component {
       },
       () => {
         // this.state.toneObject.stopAsync();
-        this.props.navigation.replace("MapViewFirst");
+        this.props.navigation.replace("MapViewFirst", {
+          showRiderCancleTrip: true,
+        });
       }
     );
     //this.runsound();

@@ -27,6 +27,7 @@ import {
 } from "react-native-paper";
 //import * as Permissions from 'expo-permissions';
 //import MapView , { Marker, Circle, AnimatedRegion}from 'react-native-maps';
+import { moderateScale } from "react-native-size-matters";
 import {
   ProviderPropType,
   Circle,
@@ -49,6 +50,8 @@ import FlashMessage, {
 } from "react-native-flash-message";
 import Modal from "react-native-modal";
 import Spinner from "react-native-loading-spinner-overlay";
+
+// import { stylesLocal } from "./MapViewOffline";
 
 import {
   styles,
@@ -94,11 +97,16 @@ import MapboxGL, {
   Camera,
   UserLocation,
 } from "@react-native-mapbox-gl/maps";
+import { TouchableHighlight } from "react-native-gesture-handler";
 
 export default class MapViewFirst extends React.Component {
   constructor(props) {
     super(props);
+    console.log("MapViewFirst_props", props);
     this.state = {
+      showRiderCancleTrip: props.route.params?.showRiderCancleTrip
+        ? props.route.params.showRiderCancleTrip
+        : false,
       step: 1,
       locationcur: {},
       radius: 40,
@@ -277,6 +285,11 @@ export default class MapViewFirst extends React.Component {
     this.updateisBusy = setTimeout(() => {
       this.updateFirbaseDriver();
     }, 1000);
+    if (this.state.showRiderCancleTrip) {
+      setTimeout(() => {
+        this.setState({ showRiderCancleTrip: false });
+      }, 4000);
+    }
 
     /*if(this.state.isDriOnline){
             setInterval(() => {
@@ -780,51 +793,90 @@ export default class MapViewFirst extends React.Component {
               />
             </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={[pageStyles.tripTabChild, { alignItems: "center", flex: 4 }]}
-            onPress={() => this.props.navigation.navigate("TripPlaner")}
-          >
-            {!this.state.quePosition ? (
-              <Text style={{ fontSize: 18 }}>You're Online</Text>
-            ) : (
-              <View style={{ width: "100%", alignItems: "center" }}>
-                <Text>You are</Text>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <View style={{ flex: 1, alignItems: "flex-end" }}>
-                    <Text style={{ fontWeight: "bold", fontSize: 16 }}>
-                      {this.state.open_services}
-                    </Text>
-                  </View>
-
-                  <View style={{ flex: 1, alignItems: "center" }}>
-                    <Text
-                      style={{
-                        backgroundColor: "#135aa8",
-                        paddingHorizontal: 15,
-                        borderRadius: 5,
-                        color: "#FFF",
-                      }}
-                    >
-                      {this.state.quePosition}
-                    </Text>
-                  </View>
-
-                  <View style={{ flex: 1, alignItems: "flex-start" }}>
-                    <Text style={{ fontWeight: "bold", fontSize: 16 }}>
-                      ahead
-                    </Text>
-                  </View>
-                </View>
-                <Text style={{ fontSize: 16 }}>Waiting in queue</Text>
+          {this.state.showRiderCancleTrip ? (
+            <TouchableOpacity
+              style={[
+                pageStyles.tripTabChild,
+                {
+                  alignItems: "center",
+                  flex: 4,
+                  backgroundColor: "#E8202A",
+                  marginTop: 5,
+                  marginBottom: 10,
+                },
+              ]}
+              onPress={() => {
+                this.setState({
+                  showRiderCancleTrip: false,
+                });
+              }}
+            >
+              <View
+                style={{
+                  width: "100%",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ fontSize: 17, color: "#FFF" }}>Hold On!</Text>
+                <Text style={{ fontSize: 15, color: "#FFF" }}>
+                  Rider Has Cancel this trip
+                </Text>
+                <Text style={{ fontSize: 13, color: "#FFF" }}>
+                  You receive cancellation fee
+                </Text>
               </View>
-            )}
-          </TouchableOpacity>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={[
+                pageStyles.tripTabChild,
+                { alignItems: "center", flex: 4 },
+              ]}
+              onPress={() => this.props.navigation.navigate("TripPlaner")}
+            >
+              {!this.state.quePosition ? (
+                <Text style={{ fontSize: 18 }}>You're Online</Text>
+              ) : (
+                <View style={{ width: "100%", alignItems: "center" }}>
+                  <Text>You are</Text>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <View style={{ flex: 1, alignItems: "flex-end" }}>
+                      <Text style={{ fontWeight: "bold", fontSize: 16 }}>
+                        {this.state.open_services}
+                      </Text>
+                    </View>
+
+                    <View style={{ flex: 1, alignItems: "center" }}>
+                      <Text
+                        style={{
+                          backgroundColor: "#135aa8",
+                          paddingHorizontal: 15,
+                          borderRadius: 5,
+                          color: "#FFF",
+                        }}
+                      >
+                        {this.state.quePosition}
+                      </Text>
+                    </View>
+
+                    <View style={{ flex: 1, alignItems: "flex-start" }}>
+                      <Text style={{ fontWeight: "bold", fontSize: 16 }}>
+                        ahead
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={{ fontSize: 16 }}>Waiting in queue</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
+
           <View
             style={[
               pageStyles.tripTabChild,

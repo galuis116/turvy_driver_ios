@@ -51,6 +51,7 @@ export default class FindingTrip extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      countNotAceeptRequeset: 0,
       accessTokan: "",
       driverId: null,
       bookrequest: {},
@@ -264,7 +265,7 @@ export default class FindingTrip extends React.Component {
                       res.data.map((item, index) => {
                         const servicetypes = {};
                         if (item.id == json.data.servicetype_id) {
-                          //console.log('servicetypes',item)
+                          console.log("servicetypes", item);
                           this.setState({
                             servicetypes: item,
                           });
@@ -311,6 +312,7 @@ export default class FindingTrip extends React.Component {
                       <FontAwesome5 name="user-alt" size={20} color="white" />
                       <Text
                         style={{
+                          fontSize: 16,
                           paddingLeft: 10,
                           borderWidth: 1,
                           color: "#FFF",
@@ -465,7 +467,7 @@ export default class FindingTrip extends React.Component {
                     <Button
                       mode="contained"
                       color={"#135AA8"}
-                      onPress={() => this._onPressCancel("manual")}
+                      onPress={() => this._onPressCancel("auto")}
                     >
                       Decline
                     </Button>
@@ -475,6 +477,113 @@ export default class FindingTrip extends React.Component {
             </Grid>
           </View>
         </TouchableOpacity>
+      </>
+    );
+  };
+
+  renderChoice = () => {
+    return (
+      <>
+        <Spinner
+          visible={this.state.spinner}
+          color="#FFF"
+          overlayColor="rgba(0, 0, 0, 0.5)"
+        />
+        <View
+          style={{
+            width: "100%",
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ fontSize: 20, color: "#155aa8" }}>
+            Still accepting!
+          </Text>
+          <Text style={{ fontSize: 20, color: "#155aa8", marginBottom: 20 }}>
+            requests?
+          </Text>
+          <Text style={{ fontSize: 15, color: "#155aa8" }}>
+            It looks like you haven't accepted
+          </Text>
+          <Text style={{ fontSize: 15, color: "#155aa8", marginBottom: 10 }}>
+            a request in a while
+          </Text>
+          <Button
+            mode="contained"
+            color={"#135AA8"}
+            style={{ width: 250, marginVertical: 10 }}
+            onPress={async () => {
+              db.collection("driver_locations")
+                .doc(this.state.driverId)
+                .delete();
+
+              AsyncStorage.setItem("isOnline", "false");
+
+              await AsyncStorage.getItem("accesstoken")
+                .then((value) => {
+                  if (value != "" && value !== null) {
+                    this.setState({ spinner: true });
+                    fetch(DOMAIN + "api/driver/offline", {
+                      method: "GET",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                        Authorization: "Bearer " + value,
+                      },
+                    })
+                      .then(function (response) {
+                        return response.json();
+                      })
+                      .then((result) => {
+                        this.setState({
+                          spinner: false,
+                          countNotAceeptRequeset: 0,
+                        });
+                        this.refs.fmChoice.hideMessage();
+                        if (result.status === 1) {
+                          AsyncStorage.removeItem("driver_timeout");
+                          this.props.navigation.navigate("MapViewOffline");
+                        }
+                      })
+                      .catch((error) => {
+                        console.error("GoOfflineError", error);
+                        this.setState({
+                          spinner: false,
+                          // countNotAceeptRequeset: 2,
+                        });
+                        // this.refs.fmChoice.hideMessage();
+                        //   this.refs.fmNotification.showMessage({
+                        //     message: `Going Offline API Failed`,
+                        //     description: `${error}`,
+                        //     type: "danger",
+                        //   });
+                      });
+                  }
+                })
+                .catch((error) => {
+                  console.error("GettingAccessTokenFormStrogeError", error);
+                  this.setState({ spinner: false });
+                  // this.refs.fmNotification.showMessage({
+                  //   message: `Getting AccessToken from AsyncStorage Failed`,
+                  //   description: `${error}`,
+                  //   type: "danger",
+                  // });
+                });
+            }}
+          >
+            NO, STAY OFFLINE
+          </Button>
+          <Button
+            mode="contained"
+            color={"#135AA8"}
+            style={{ width: 250, marginVertical: 10 }}
+            onPress={() => {
+              this.refs.fmChoice.hideMessage();
+              this.setState({ countNotAceeptRequeset: 0 });
+            }}
+          >
+            YES, GO ONLINE
+          </Button>
+        </View>
       </>
     );
   };
@@ -522,6 +631,7 @@ export default class FindingTrip extends React.Component {
   async _onPressAccept() {
     this.setState({
       runOut: true,
+      countNotAceeptRequeset: 0,
     });
     //this.runsound();
     if (this.state.toneObject) this.state.toneObject.stopAsync();
@@ -563,6 +673,7 @@ export default class FindingTrip extends React.Component {
 
   async _onPressCancel(declineBy) {
     this.setState({ runOut: true });
+    clearTimeout(this.drtimeout);
     if (this.state.toneObject) this.state.toneObject.stopAsync();
     AsyncStorage.getItem("accesstoken").then((value) => {
       if (value != "" && value !== null) {
@@ -592,16 +703,40 @@ export default class FindingTrip extends React.Component {
             //console.log(result);
             if (result.status === 1) {
               this.refs.fmLocalIntstance.hideMessage();
+
               this.setState(
                 {
                   fetchnewrequest: true,
                   spinner: false,
                   progressBar: 1,
                   prcount: this.state.driver_timeout / 1000,
+                  countNotAceeptRequeset: this.state.countNotAceeptRequeset + 1,
                 },
                 () => {
                   //this.props.navigation.navigate('MapViewFirst');
                   //this.recallRequest();
+                  console.log(
+                    "countNotAcceptRequest",
+                    this.state.countNotAceeptRequeset
+                  );
+                  if (this.state.countNotAceeptRequeset == 3)
+                    this.refs.fmChoice.showMessage({
+                      message: "",
+                      type: "default",
+                      backgroundColor: "#ededed",
+                      autoHide: false,
+                      hideOnPress: false,
+                      style: {
+                        margin: 10,
+                        borderRadius: 10,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        elevation: 10,
+                      },
+                      renderCustomContent: () => {
+                        return this.renderChoice();
+                      },
+                    });
                 }
               );
             }
@@ -613,7 +748,9 @@ export default class FindingTrip extends React.Component {
   render() {
     return (
       <>
+        <FlashMessage ref="fmNotification" position="top" />
         <FlashMessage ref="fmLocalIntstance" position={{ top: "45%" }} />
+        <FlashMessage ref="fmChoice" position={{ top: "65%" }} />
         <MapView>
           {Object.keys(this.state.startGeo).length > 0 &&
           Object.keys(this.state.endGeo).length > 0 ? (
@@ -688,7 +825,7 @@ const stylesLocal = StyleSheet.create({
     borderRadius: 5,
     justifyContent: "center",
     alignContent: "center",
-    paddingVertical: 15,
+    paddingVertical: 5,
     width: 150,
   },
 });
