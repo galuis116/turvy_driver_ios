@@ -2975,13 +2975,13 @@ export default class BookingMap extends Component {
           </>
         ) : (
           <MapboxGL.MapView
+            compassEnabled={false}
             ref={(c) => (this._map = c)}
             onDidFinishLoadingMap={(index) => {
               this.onDidFinishLoadingMap();
             }}
             style={{ flex: 1 }}
             styleURL={this.state.MapboxStyleURL}
-            compassEnabled={true}
             onPress={() => {
               this.setState(
                 {
@@ -3272,11 +3272,12 @@ export default class BookingMap extends Component {
           animationOut="zoomOutDown"
           animationInTiming={600}
           animationOutTiming={400}
+          // avoidKeyboard={true}
         >
           <View
             style={{
               backgroundColor: "#FFF",
-              height: moderateScale(280),
+              height: moderateScale(230),
               borderRadius: moderateScale(5),
             }}
           >
@@ -3288,7 +3289,7 @@ export default class BookingMap extends Component {
             <Divider orientation="vertical" />
             {this.state.cancelSuccess === "" ? (
               <>
-                <Row style={{ height: moderateScale(150) }}>
+                <Row style={{ height: moderateScale(100) }}>
                   <Col
                     style={{
                       alignItems: "flex-start",

@@ -46,13 +46,14 @@ export default class DriverRating extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      screenHeight: ["100%", "85%", "65%", "45%", "0%"],
       inprocessing: 0,
       riderAgrRating: 0,
       tipVal: 0,
       accessTokan: "",
       driverId: "",
       showBottomSheet: 1,
-      screenHeight: height * 0.85,
+      // screenHeight: height * 0.85,
       rateError: "",
       rateSuccess: "",
       feedbackText: "",
@@ -66,6 +67,7 @@ export default class DriverRating extends React.Component {
       rideravtar: "",
       active: "",
     };
+    this.myRefbt = React.createRef();
   }
 
   async componentDidMount() {
@@ -150,10 +152,11 @@ export default class DriverRating extends React.Component {
 
   ratingCompleted = (rating) => {
     console.log(rating);
-    if (rating > 4) {
+    if (rating == 5) {
       this.setState({
         riderRating: rating,
       });
+      this.myRefbt.current.snapTo(2);
     } else {
       this.setState({
         riderRating: rating,
@@ -162,6 +165,7 @@ export default class DriverRating extends React.Component {
   };
 
   rateRider = () => {
+    console.log(this.state.active);
     if (this.state.active == "" && this.state.riderRating < 5) {
       showMessage({
         message: "Please input what went wrong",
@@ -184,8 +188,8 @@ export default class DriverRating extends React.Component {
     }
     this.setState({
       inprocessing: 1,
-      screenHeight: height * 0.57,
     });
+    this.myRefbt.current.snapTo(3);
   };
 
   async submit() {
@@ -217,7 +221,7 @@ export default class DriverRating extends React.Component {
       .then((result) => {
         console.log("feedback", result);
         if (result.status === 1) {
-          this.setState({ screenHeight: height / 3 });
+          // this.setState({ screenHeight: height / 3 });
           this.setState({ rateSuccess: result.message });
           setTimeout(() => {
             this.setState({ showBottomSheet: 0 });
@@ -437,12 +441,12 @@ export default class DriverRating extends React.Component {
                 </Col>
               </Row>
             </Row>
-            <Divider style={{ marginBottom: 5, marginTop: 25 }} />
+            <Divider style={{ marginBottom: 5, marginTop: 5 }} />
             <Row>
               <Col size={12}>
                 <Row
                   style={{
-                    height: 250,
+                    height: 200,
                     display: "flex",
                     alignContent: "center",
                     justifyContent: "center",
@@ -491,17 +495,18 @@ export default class DriverRating extends React.Component {
                           <TextInput
                             placeholder="Tell us what went wrong"
                             blurOnSubmit={false}
+                            value={this.state.active}
                             returnKeyType={"go"}
                             style={styles.textInput}
                             onFocus={(e) => {
-                              //   this.myRefbt.current.snapTo(0);
+                              this.myRefbt.current.snapTo(0);
                             }}
                             onBlur={(e) => {
-                              //   this.myRefbt.current.snapTo(0);
+                              this.myRefbt.current.snapTo(3);
                             }}
                             multiline={true}
                             scrollEnabled={true}
-                            numberOfLines={50}
+                            numberOfLines={5}
                             underlineColorAndroid={"transparent"}
                             autoCapitalize={"none"}
                             autoCorrect={false}
@@ -546,12 +551,12 @@ export default class DriverRating extends React.Component {
                   name="arrow-back"
                   size={24}
                   color="black"
-                  onPress={() =>
+                  onPress={() => {
                     this.setState({
                       inprocessing: 0,
-                      screenHeight: height * 0.77,
-                    })
-                  }
+                    });
+                    this.myRefbt.current.snapTo(2);
+                  }}
                 />
               </Col>
               <Col>
@@ -600,8 +605,15 @@ export default class DriverRating extends React.Component {
                 <TextInput
                   placeholder="Say something about trip?"
                   blurOnSubmit={false}
+                  value={this.state.feedbackText}
                   returnKeyType={"go"}
                   style={styles.textInput}
+                  onFocus={(e) => {
+                    this.myRefbt.current.snapTo(1);
+                  }}
+                  onBlur={(e) => {
+                    this.myRefbt.current.snapTo(3);
+                  }}
                   multiline={true}
                   scrollEnabled={true}
                   numberOfLines={50}
@@ -642,7 +654,9 @@ export default class DriverRating extends React.Component {
     return this.state.showBottomSheet ? (
       <>
         <BottomSheet
-          snapPoints={[this.state.screenHeight]}
+          ref={this.myRefbt}
+          snapPoints={this.state.screenHeight}
+          initialSnap="2"
           borderRadius={20}
           renderContent={
             this.state.rateSuccess !== ""

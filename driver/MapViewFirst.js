@@ -718,12 +718,12 @@ export default class MapViewFirst extends React.Component {
         <TopBar />
 
         <MapboxGL.MapView
+          compassEnabled={false}
           ref={(c) => (this._map = c)}
           onPress={this.onPress}
           onDidFinishLoadingMap={this.onDidFinishLoadingMap}
           style={{ flex: 1 }}
           styleURL={this.state.MapboxStyleURL}
-          compassViewPosition={3}
         >
           <Camera
             zoomLevel={this.state.zoomLevel}

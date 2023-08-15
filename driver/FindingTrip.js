@@ -63,8 +63,8 @@ export default class FindingTrip extends React.Component {
       endGeo: {},
       currentLoc: {},
       pickupInfo: {
-        duration: "6 min pickup",
-        distance: "10Km",
+        duration: "0 min pickup",
+        distance: "0Km",
       },
       tripDistance: {
         duration: "",
