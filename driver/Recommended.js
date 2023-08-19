@@ -60,6 +60,10 @@ export default class Recommended extends React.Component {
       origin: {},
       spinner: false,
       peaktime: null,
+      mypoints: 1500,
+      qualifyPoints: 1680,
+      totalPoints: 2880,
+      declineCounts: 0,
       screen: this.props.route.params.screen,
     };
   }
@@ -73,6 +77,7 @@ export default class Recommended extends React.Component {
             accessTokan: value,
           },
           () => {
+            this._getLoyalty();
             this._getPeaktime();
           }
         );
@@ -84,6 +89,29 @@ export default class Recommended extends React.Component {
       }
     });
   }
+
+  _getLoyalty = async () => {
+    await fetch(DOMAIN + "api/driver/loyalty", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: "Bearer " + this.state.accessTokan,
+      },
+    })
+      .then(function (response) {
+        return response.json();
+      })
+      .then((result) => {
+        console.log("driver_loyalty", result);
+        const { totalPoints, qualifyPoints, declineCounts } = result.data;
+        this.setState({
+          totalPoints,
+          qualifyPoints,
+          declineCounts,
+        });
+      });
+  };
 
   _getPeaktime = async () => {
     await fetch(DOMAIN + "api/driver/peaktime", {
@@ -212,6 +240,45 @@ export default class Recommended extends React.Component {
                   </View>
                 </>
               ) : null} */}
+              <View style={pageStyles.promoBox}>
+                <Row
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Col size={2}>
+                    <MaterialCommunityIcons
+                      name="pentagon"
+                      size={24}
+                      color="blue"
+                    />
+                  </Col>
+                  <Col size={7}>
+                    <View style={{ marginHorizontal: 0 }}>
+                      <Text>Unlock Loyality</Text>
+                      <Text>{this.state.declineCounts}</Text>
+                    </View>
+                  </Col>
+                  <Col size={2}>
+                    <MaterialCommunityIcons
+                      name="hexagon"
+                      size={24}
+                      color={
+                        this.state.mypoints < this.state.qualifyPoints
+                          ? "#6638d9"
+                          : "green"
+                      }
+                    />
+                  </Col>
+                  <Col size={6}>
+                    <Text style={{ fontSize: 15 }}>
+                      {this.state.mypoints} / {this.state.totalPoints} pts
+                    </Text>
+                  </Col>
+                </Row>
+              </View>
               <View style={{ height: 20 }}></View>
               <View style={pageStyles.promoBox}>
                 <TouchableOpacity
