@@ -77,6 +77,7 @@ export default class FindingTrip extends React.Component {
       prcount: 8,
       multidest: {},
       appState: AppState.currentState,
+      showStillRequest: false,
     };
   }
 
@@ -241,23 +242,24 @@ export default class FindingTrip extends React.Component {
                     });
                   }
                   this.runsound();
-                  this.refs.fmLocalIntstance.showMessage({
-                    message: "",
-                    type: "default",
-                    backgroundColor: "#ededed",
-                    autoHide: false,
-                    hideOnPress: false,
-                    style: {
-                      margin: 10,
-                      borderRadius: 10,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      elevation: 10,
-                    },
-                    renderCustomContent: () => {
-                      return this.renderTrip();
-                    },
-                  });
+                  if (!this.state.showStillRequest)
+                    this.refs.fmLocalIntstance.showMessage({
+                      message: "",
+                      type: "default",
+                      backgroundColor: "#ededed",
+                      autoHide: false,
+                      hideOnPress: false,
+                      style: {
+                        margin: 10,
+                        borderRadius: 10,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        elevation: 10,
+                      },
+                      renderCustomContent: () => {
+                        return this.renderTrip();
+                      },
+                    });
 
                   fetch(DOMAIN + "api/servicetypes")
                     .then((response) => response.json())
@@ -309,7 +311,7 @@ export default class FindingTrip extends React.Component {
                         textAlign: "center",
                       }}
                     >
-                      <FontAwesome5 name="user-alt" size={20} color="white" />
+                      <FontAwesome5 name="user-alt" size={16} color="white" />
                       <Text
                         style={{
                           fontSize: 16,
@@ -537,6 +539,7 @@ export default class FindingTrip extends React.Component {
                         this.setState({
                           spinner: false,
                           countNotAceeptRequeset: 0,
+                          showStillRequest: false,
                         });
                         this.refs.fmChoice.hideMessage();
                         if (result.status === 1) {
@@ -549,8 +552,9 @@ export default class FindingTrip extends React.Component {
                         this.setState({
                           spinner: false,
                           // countNotAceeptRequeset: 2,
+                          showStillRequest: false,
                         });
-                        // this.refs.fmChoice.hideMessage();
+                        this.refs.fmChoice.hideMessage();
                         //   this.refs.fmNotification.showMessage({
                         //     message: `Going Offline API Failed`,
                         //     description: `${error}`,
@@ -561,7 +565,8 @@ export default class FindingTrip extends React.Component {
                 })
                 .catch((error) => {
                   console.error("GettingAccessTokenFormStrogeError", error);
-                  this.setState({ spinner: false });
+                  this.setState({ spinner: false, showStillRequest: false });
+                  this.refs.fmChoice.hideMessage();
                   // this.refs.fmNotification.showMessage({
                   //   message: `Getting AccessToken from AsyncStorage Failed`,
                   //   description: `${error}`,
@@ -578,7 +583,10 @@ export default class FindingTrip extends React.Component {
             style={{ width: 250, marginVertical: 10 }}
             onPress={() => {
               this.refs.fmChoice.hideMessage();
-              this.setState({ countNotAceeptRequeset: 0 });
+              this.setState({
+                // countNotAceeptRequeset: 0,
+                showStillRequest: false,
+              });
             }}
           >
             YES, GO ONLINE
@@ -719,7 +727,7 @@ export default class FindingTrip extends React.Component {
                     "countNotAcceptRequest",
                     this.state.countNotAceeptRequeset
                   );
-                  if (this.state.countNotAceeptRequeset == 3)
+                  if (this.state.countNotAceeptRequeset >= 3) {
                     this.refs.fmChoice.showMessage({
                       message: "",
                       type: "default",
@@ -737,6 +745,8 @@ export default class FindingTrip extends React.Component {
                         return this.renderChoice();
                       },
                     });
+                    this.setState({ showStillRequest: true });
+                  }
                 }
               );
             }
@@ -821,7 +831,7 @@ const stylesLocal = StyleSheet.create({
   vehicelbox: {
     backgroundColor: "#155aa8",
     margin: 10,
-    elevation: 4,
+    elevation: 2,
     borderRadius: 5,
     justifyContent: "center",
     alignContent: "center",

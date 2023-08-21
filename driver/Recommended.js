@@ -63,7 +63,7 @@ export default class Recommended extends React.Component {
       mypoints: 1500,
       qualifyPoints: 1680,
       totalPoints: 2880,
-      declineCounts: 0,
+      driverPoints: 0,
       screen: this.props.route.params.screen,
     };
   }
@@ -104,11 +104,11 @@ export default class Recommended extends React.Component {
       })
       .then((result) => {
         console.log("driver_loyalty", result);
-        const { totalPoints, qualifyPoints, declineCounts } = result.data;
+        const { totalPoints, qualifyPoints, driverPoints } = result.data;
         this.setState({
           totalPoints,
           qualifyPoints,
-          declineCounts,
+          driverPoints,
         });
       });
   };
@@ -257,8 +257,10 @@ export default class Recommended extends React.Component {
                   </Col>
                   <Col size={7}>
                     <View style={{ marginHorizontal: 0 }}>
-                      <Text>Unlock Loyality</Text>
-                      <Text>{this.state.declineCounts}</Text>
+                      <Text>Unlock Loyalty</Text>
+                      <Text>
+                        {this.state.qualifyPoints - this.state.driverPoints}
+                      </Text>
                     </View>
                   </Col>
                   <Col size={2}>
@@ -266,7 +268,7 @@ export default class Recommended extends React.Component {
                       name="hexagon"
                       size={24}
                       color={
-                        this.state.mypoints < this.state.qualifyPoints
+                        this.state.driverPoints < this.state.qualifyPoints
                           ? "#6638d9"
                           : "green"
                       }
@@ -274,7 +276,7 @@ export default class Recommended extends React.Component {
                   </Col>
                   <Col size={6}>
                     <Text style={{ fontSize: 15 }}>
-                      {this.state.mypoints} / {this.state.totalPoints} pts
+                      {this.state.driverPoints} / {this.state.totalPoints} pts
                     </Text>
                   </Col>
                 </Row>

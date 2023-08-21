@@ -9,6 +9,7 @@ import {
   StyleSheet,
   DeviceEventEmitter,
   FlatList,
+  TouchableOpacity,
 } from "react-native";
 
 import { styles, theme, DOMAIN } from "./Constant";
@@ -25,6 +26,7 @@ export default class DrivingTime extends React.Component {
       offlineTime: 0.0,
       accessTokan: "",
       drivingTimePolicy: [],
+      showLearnMore: true,
     };
   }
 
@@ -206,6 +208,7 @@ export default class DrivingTime extends React.Component {
                 <FlatList
                   data={this.state.drivingTimePolicy}
                   renderItem={({ item, index }) => {
+                    if (this.state.showLearnMore && index > 2) return;
                     return (
                       <View style={{ padding: 15, marginVertical: 5 }}>
                         <Text style={localStyle.timeTxt}>{item.title}</Text>
@@ -216,6 +219,25 @@ export default class DrivingTime extends React.Component {
                     );
                   }}
                 />
+                {this.state.showLearnMore &&
+                  this.state.drivingTimePolicy.length > 2 && (
+                    <TouchableOpacity
+                      onPress={() => {
+                        this.setState({ showLearnMore: false });
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 23,
+                          fontWeight: "bold",
+                          padding: 15,
+                          color: "#4864c2",
+                        }}
+                      >
+                        Learn more
+                      </Text>
+                    </TouchableOpacity>
+                  )}
               </>
             ) : null}
           </View>

@@ -53,7 +53,7 @@ export default class Documents extends React.Component {
       driverId: "",
       spinner: true,
       showBottomSheet: false,
-      screenHeight: "90%",
+      screenHeight: "86%",
       selectedIndex: 1,
       selectedItem: {},
     };
@@ -164,6 +164,7 @@ export default class Documents extends React.Component {
               },
             });
           } else {
+            this.setState({ spinner: false });
             this.refs.commentMessage.showMessage({
               message: "Updating Document Failed",
               type: "danger",
@@ -242,7 +243,9 @@ export default class Documents extends React.Component {
     const { selectedIndex, selectedItem } = this.state;
     console.log("selectedItem", selectedItem);
     return (
-      <ScrollView style={{ zIndex: 200 }}>
+      <ScrollView
+        style={{ zIndex: 200, borderBottomWidth: 3, borderRadius: 10 }}
+      >
         <Appbar.Header style={{ backgroundColor: "#003C77" }} mode="small">
           <Appbar.BackAction
             onPress={() => this.setState({ showBottomSheet: false })}
@@ -252,7 +255,7 @@ export default class Documents extends React.Component {
             style={{ marginLeft: 0, paddingLeft: 0 }}
           />
         </Appbar.Header>
-        <Surface style={[stylesinp.surface, [{ marginTop: 0 }]]}>
+        <Surface style={[stylesinp.surface, [{ marginVertical: 0 }]]}>
           <View style={{ marginTop: 10 }}>
             <Text style={{ textAlign: "center" }}>
               {selectedItem.document_name}
@@ -269,34 +272,27 @@ export default class Documents extends React.Component {
             <Text style={{ textAlign: "justify" }}>
               {selectedItem.document_description}
             </Text>
-            <View style={{ flexDirection: "row", marginVertical: 10 }}>
-              <AntDesign name="infocirlce" size={22} color="blue" />
-              <Text style={{ marginLeft: 5, color: "blue" }}>
-                What is this?
-              </Text>
-            </View>
+
             {selectedItem.document_imageurl ? (
-              <Image
-                source={{ uri: selectedItem.document_imageurl }}
-                style={{
-                  alignItems: "center",
-                  width: 300,
-                  height: 300,
-                  borderRadius: 5,
-                }}
-                resizeMode="cover"
-              />
-            ) : (
-              <Image
-                source={require("../assets/no-image.png")}
-                style={{
-                  alignItems: "center",
-                  width: 224,
-                  height: 244,
-                  borderRadius: 5,
-                }}
-              />
-            )}
+              <>
+                <View style={{ flexDirection: "row", marginVertical: 10 }}>
+                  <AntDesign name="infocirlce" size={22} color="blue" />
+                  <Text style={{ marginLeft: 5, color: "blue" }}>
+                    What is this?
+                  </Text>
+                </View>
+                <Image
+                  source={{ uri: selectedItem.document_imageurl }}
+                  style={{
+                    alignItems: "center",
+                    width: 300,
+                    height: 300,
+                    borderRadius: 5,
+                  }}
+                  resizeMode="cover"
+                />
+              </>
+            ) : null}
           </View>
           <TouchableOpacity
             style={{ marginVertical: 10 }}
@@ -356,7 +352,7 @@ export default class Documents extends React.Component {
               />
             )}
           </TouchableOpacity>
-          <View
+          {/* <View
             style={{
               flexDirection: "row",
               alignItems: "center",
@@ -389,7 +385,7 @@ export default class Documents extends React.Component {
                 );
               }}
             />
-          </View>
+          </View> */}
           <Button
             mode="contained"
             uppercase={false}
@@ -399,7 +395,7 @@ export default class Documents extends React.Component {
               this.handleUpdateDocument();
             }}
           >
-            Update Document
+            Upload photo
           </Button>
         </Surface>
       </ScrollView>
@@ -425,10 +421,24 @@ export default class Documents extends React.Component {
               {Object.keys(this.state.documentList).length > 0
                 ? this.state.documentList.map((item, index) => {
                     return (
-                      <Surface style={[stylesinp.surface, [{ padding: 5 }]]}>
+                      <View
+                        style={[
+                          stylesinp.surface,
+                          [
+                            {
+                              padding: 5,
+                              backgroundColor:
+                                item?.document_status == 1
+                                  ? "#e4d1d1"
+                                  : "#f7f5f0",
+                            },
+                          ],
+                        ]}
+                      >
                         <TouchableOpacity
                           style={{
                             marginVertical: 10,
+                            marginLeft: 10,
                             height: 40,
                           }}
                           onPress={() => {
@@ -453,36 +463,46 @@ export default class Documents extends React.Component {
                             </Col>
                             <Col size={3}>
                               {item?.document_status == 1 ? (
-                                <Text
+                                <View
                                   style={{
-                                    textAlign: "center",
-                                    backgroundColor: "#4CAF50",
-                                    color: "white",
-                                    width: 80,
+                                    backgroundColor: "green",
                                     borderRadius: 10,
-                                    alignSelf: "center",
                                   }}
                                 >
-                                  Approved
-                                </Text>
+                                  <Text
+                                    style={{
+                                      textAlign: "center",
+                                      color: "white",
+                                      width: 80,
+                                      alignSelf: "center",
+                                    }}
+                                  >
+                                    Approved
+                                  </Text>
+                                </View>
                               ) : item?.document_status == 0 ? (
-                                <Text
+                                <View
                                   style={{
-                                    textAlign: "center",
                                     backgroundColor: "#F44336",
-                                    color: "white",
-                                    width: 80,
                                     borderRadius: 10,
-                                    alignSelf: "center",
                                   }}
                                 >
-                                  Pending
-                                </Text>
+                                  <Text
+                                    style={{
+                                      textAlign: "center",
+                                      color: "white",
+                                      width: 80,
+                                      alignSelf: "center",
+                                    }}
+                                  >
+                                    Pending
+                                  </Text>
+                                </View>
                               ) : null}
                             </Col>
                           </Row>
                         </TouchableOpacity>
-                      </Surface>
+                      </View>
                     );
                   })
                 : null}
@@ -531,7 +551,7 @@ const stylesinp = StyleSheet.create({
     justifyContent: "center",
     elevation: 2,
     borderRadius: 5,
-    marginHorizontal: 20,
+    marginHorizontal: 10,
     marginVertical: 10,
   },
 });
