@@ -128,6 +128,14 @@ export default class FindingTrip extends React.Component {
       }
     });
 
+    await AsyncStorage.getItem("accesstoken").then((value) => {
+      if (value != "" && value !== null) {
+        this.setState({
+          accessTokan: value,
+        });
+      }
+    });
+
     await AsyncStorage.getItem("isOnline").then((value) => {
       if (value === "true") {
         this.setState(
@@ -241,8 +249,9 @@ export default class FindingTrip extends React.Component {
                       multidest: this.state.bookrequest.multdest,
                     });
                   }
-                  this.runsound();
-                  if (!this.state.showStillRequest)
+
+                  if (!this.state.showStillRequest) {
+                    this.runsound();
                     this.refs.fmLocalIntstance.showMessage({
                       message: "",
                       type: "default",
@@ -260,20 +269,20 @@ export default class FindingTrip extends React.Component {
                         return this.renderTrip();
                       },
                     });
-
-                  fetch(DOMAIN + "api/servicetypes")
-                    .then((response) => response.json())
-                    .then((res) => {
-                      res.data.map((item, index) => {
-                        const servicetypes = {};
-                        if (item.id == json.data.servicetype_id) {
-                          console.log("servicetypes", item);
-                          this.setState({
-                            servicetypes: item,
-                          });
-                        }
-                      }); // end of map
-                    });
+                    fetch(DOMAIN + "api/servicetypes")
+                      .then((response) => response.json())
+                      .then((res) => {
+                        res.data.map((item, index) => {
+                          const servicetypes = {};
+                          if (item.id == json.data.servicetype_id) {
+                            console.log("servicetypes", item);
+                            this.setState({
+                              servicetypes: item,
+                            });
+                          }
+                        }); // end of map
+                      });
+                  }
                 }
               );
             }
@@ -520,58 +529,45 @@ export default class FindingTrip extends React.Component {
 
               AsyncStorage.setItem("isOnline", "false");
 
-              await AsyncStorage.getItem("accesstoken")
-                .then((value) => {
-                  if (value != "" && value !== null) {
-                    this.setState({ spinner: true });
-                    fetch(DOMAIN + "api/driver/offline", {
-                      method: "GET",
-                      headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                        Authorization: "Bearer " + value,
-                      },
-                    })
-                      .then(function (response) {
-                        return response.json();
-                      })
-                      .then((result) => {
-                        this.setState({
-                          spinner: false,
-                          countNotAceeptRequeset: 0,
-                          showStillRequest: false,
-                        });
-                        this.refs.fmChoice.hideMessage();
-                        if (result.status === 1) {
-                          AsyncStorage.removeItem("driver_timeout");
-                          this.props.navigation.navigate("MapViewOffline");
-                        }
-                      })
-                      .catch((error) => {
-                        console.error("GoOfflineError", error);
-                        this.setState({
-                          spinner: false,
-                          // countNotAceeptRequeset: 2,
-                          showStillRequest: false,
-                        });
-                        this.refs.fmChoice.hideMessage();
-                        //   this.refs.fmNotification.showMessage({
-                        //     message: `Going Offline API Failed`,
-                        //     description: `${error}`,
-                        //     type: "danger",
-                        //   });
-                      });
+              this.setState({ spinner: true });
+              fetch(DOMAIN + "api/driver/offline", {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "application/json",
+                  Authorization: "Bearer " + this.state.accessTokan,
+                },
+              })
+                .then(function (response) {
+                  return response.json();
+                })
+                .then((result) => {
+                  this.setState({
+                    spinner: false,
+                    countNotAceeptRequeset: 0,
+                    showStillRequest: false,
+                  });
+                  this.refs.fmChoice.hideMessage();
+                  if (result.status === 1) {
+                    AsyncStorage.removeItem("driver_timeout");
+                    this.props.navigation.navigate("MapViewOffline");
                   }
                 })
                 .catch((error) => {
-                  console.error("GettingAccessTokenFormStrogeError", error);
-                  this.setState({ spinner: false, showStillRequest: false });
+                  console.error("GoOfflineError", error);
+                  this.setState({
+                    spinner: false,
+                    // countNotAceeptRequeset: 2,
+                    showStillRequest: false,
+                  });
                   this.refs.fmChoice.hideMessage();
-                  // this.refs.fmNotification.showMessage({
-                  //   message: `Getting AccessToken from AsyncStorage Failed`,
-                  //   description: `${error}`,
-                  //   type: "danger",
-                  // });
+                  AsyncStorage.removeItem("driver_timeout");
+                  this.props.navigation.navigate("MapViewOffline");
+                  //   this.refs.fmNotification.showMessage({
+                  //     message: `Going Offline API Failed`,
+                  //     description: `${error}`,
+                  //     type: "danger",
+                  //   });
                 });
             }}
           >
@@ -727,6 +723,46 @@ export default class FindingTrip extends React.Component {
                     "countNotAcceptRequest",
                     this.state.countNotAceeptRequeset
                   );
+                  setTimeout(async () => {
+                    if (this.state.showStillRequest) {
+                      this.refs.fmChoice.hideMessage();
+                      this.setState({
+                        showStillRequest: false,
+                        countNotAceeptRequeset: 0,
+                      });
+                      db.collection("driver_locations")
+                        .doc(this.state.driverId)
+                        .delete();
+
+                      await fetch(DOMAIN + "api/driver/logout", {
+                        method: "GET",
+                        headers: {
+                          "Content-Type": "application/json",
+                          Accept: "application/json",
+                          Authorization: "Bearer " + this.state.accessTokan,
+                        },
+                      })
+                        .then(function (response) {
+                          return response.json();
+                        })
+                        .then((result) => {
+                          AsyncStorage.setItem("isOnline", "false");
+                        })
+                        .catch((e) => {
+                          AsyncStorage.setItem("isOnline", "false");
+                        });
+                      await AsyncStorage.removeItem("accesstoken");
+                      await AsyncStorage.removeItem("expires_at");
+                      await AsyncStorage.removeItem("email");
+                      await AsyncStorage.removeItem("name");
+                      await AsyncStorage.removeItem("avatar");
+                      await AsyncStorage.removeItem("device_token");
+                      await AsyncStorage.removeItem("countrycode");
+                      await AsyncStorage.removeItem("phone");
+                      await AsyncStorage.removeItem("driverId");
+                      this.props.navigation.navigate("LoginOtp");
+                    }
+                  }, 30000);
                   if (this.state.countNotAceeptRequeset >= 3) {
                     this.refs.fmChoice.showMessage({
                       message: "",

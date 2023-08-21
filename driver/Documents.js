@@ -217,10 +217,10 @@ export default class Documents extends React.Component {
 
   uploadDocument = async (i, document_id) => {
     //alert(document_id)
-    this.setState({ spinner: true });
+    // this.setState({ spinner: true });
     let _image = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
+      allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });

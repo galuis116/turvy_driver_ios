@@ -169,6 +169,7 @@ class RewardInfoSlider extends React.Component {
                           .then((value) => {
                             if (value != "" && value !== null) {
                               console.log("isOnline", value);
+                              this.props.onToggleModal();
                               value == "true"
                                 ? this.props.navigate("Recommended", {
                                     screen: "online",
@@ -366,7 +367,10 @@ class RewardInfoSlider extends React.Component {
                     style={{ justifyContent: "center", alignSelf: "center" }}
                   >
                     <TouchableOpacity
-                      onPress={() => this.props.navigate("WeeklySummary")}
+                      onPress={() => {
+                        this.props.onToggleModal();
+                        this.props.navigate("WeeklySummary");
+                      }}
                     >
                       <Text style={{ fontSize: 16, color: "#3f78ba" }}>
                         See Weekly Summary
@@ -474,7 +478,10 @@ class RewardInfoSlider extends React.Component {
                     style={{ justifyContent: "center", alignSelf: "center" }}
                   >
                     <TouchableOpacity
-                      onPress={() => this.props.navigate("MyEarning")}
+                      onPress={() => {
+                        this.props.onToggleModal();
+                        this.props.navigate("MyEarning");
+                      }}
                     >
                       <Text style={{ fontSize: 16, color: "#3f78ba" }}>
                         See Earnings Activity
