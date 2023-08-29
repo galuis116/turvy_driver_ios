@@ -228,6 +228,10 @@ const VerificationOtp = ({ route }) => {
                       );
                       AsyncStorage.setItem("email", driverRes.data.email);
                       AsyncStorage.setItem("name", driverRes.data.name);
+                      AsyncStorage.setItem(
+                        "status",
+                        driverRes.data.is_active == 0 ? "blocked" : "active"
+                      );
 
                       if (driverRes.data.avatar !== null) {
                         AsyncStorage.setItem("avatar", driverRes.data.avatar);

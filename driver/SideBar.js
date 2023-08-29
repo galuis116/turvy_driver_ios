@@ -47,6 +47,7 @@ export default class SideBar extends Component {
       avatar: DOMAIN + "images/no-person.png",
       accessTokan: "",
       msgCount: 0,
+      blocked: false,
     };
   }
 
@@ -55,6 +56,11 @@ export default class SideBar extends Component {
       AsyncStorage.getItem("name").then((value) => {
         if (value != "" && value !== null) {
           this.setState({ name: value });
+        }
+      });
+      AsyncStorage.getItem("status").then((value) => {
+        if (value != "" && value !== null) {
+          this.setState({ blocked: value == "blocked" ? true : false });
         }
       });
       AsyncStorage.getItem("avatar").then((value) => {
@@ -172,6 +178,7 @@ export default class SideBar extends Component {
                 }}
               >
                 <UploadImage
+                  disabled={this.state.blocked}
                   imageuri={this.state.avatar}
                   onReload={(img) => this.setState({ avatar: img })}
                   width={moderateScale(80)}
@@ -191,7 +198,9 @@ export default class SideBar extends Component {
                 >
                   {this.state.name}
                 </Text>
-                <TouchableWithoutFeedback
+                <TouchableOpacity
+                  style={{ opacity: this.state.blocked ? 0.4 : 1 }}
+                  disabled={this.state.blocked}
                   onPress={() => this.props.navigation.navigate("EditProfile")}
                 >
                   <Text
@@ -206,7 +215,7 @@ export default class SideBar extends Component {
                   >
                     Edit Profile
                   </Text>
-                </TouchableWithoutFeedback>
+                </TouchableOpacity>
               </Col>
             </Row>
           </Grid>
@@ -214,10 +223,14 @@ export default class SideBar extends Component {
         <Divider />
         <View style={{ height: moderateScale(10) }} />
         <FlatList
+          style={{ opacity: this.state.blocked ? 0.4 : 1 }}
           data={routes}
           renderItem={({ item, index }) => {
             return (
-              <TouchableOpacity onPress={() => this.openmenu(item.id)}>
+              <TouchableOpacity
+                disabled={this.state.blocked}
+                onPress={() => this.openmenu(item.id)}
+              >
                 <View
                   style={{
                     paddingVertical: moderateScale(8),

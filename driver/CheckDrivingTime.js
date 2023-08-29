@@ -1,9 +1,13 @@
 import React from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DOMAIN } from "./Constant";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Alert } from "react-native";
 import { Audio } from "expo-av";
+import * as firebase from "firebase";
+import "firebase/firestore";
+const db = firebase.firestore();
+import { theme, DOMAIN, PUSHER_API } from "./Constant";
 
+import Pusher from "pusher-js/react-native";
 export default class CheckDrivingTime extends React.Component {
   constructor(props) {
     super(props);
@@ -25,6 +29,112 @@ export default class CheckDrivingTime extends React.Component {
       this._checkDrivingTime();
       //console.log('screen name:',this.props.route.name);
     }, 60000);
+    var pusher = new Pusher(PUSHER_API.APP_KEY, {
+      cluster: PUSHER_API.APP_CLUSTER,
+    });
+    var channel = pusher.subscribe("turvy-channel");
+
+    channel.bind("admin_block_driver", this.handleAdminBlock);
+    channel.bind("admin_suspend_driver", this.handleAdminSuspend);
+  };
+
+  handleAdminBlock = async (data) => {
+    AsyncStorage.getItem("driverId").then((value) => {
+      if (value != "" && value !== null) {
+        if (data.id == value) {
+          let title =
+            data.status == "blocked"
+              ? "Your Account Is Blocked"
+              : "Your Account Is Activated.";
+          let description =
+            data.status == "blocked"
+              ? "Please contact administration"
+              : "Please go online to start accepting jobs";
+          Alert.alert(title, description, [
+            {
+              text: "Ok",
+              onPress: () => null,
+              style: "cancel",
+            },
+          ]);
+          if (data.status == "blocked") {
+            db.collection("driver_locations").doc(value).delete();
+            AsyncStorage.setItem("status", "blocked");
+            AsyncStorage.getItem("accesstoken").then((token) => {
+              if (token != "" && token !== null) {
+                fetch(DOMAIN + "api/driver/offline", {
+                  method: "GET",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: "Bearer " + token,
+                  },
+                })
+                  .then(function (response) {
+                    return response.json();
+                  })
+                  .then((result) => {
+                    console.log("offline", result);
+                    AsyncStorage.setItem("isOnline", "false");
+                  })
+                  .catch((e) => {
+                    AsyncStorage.setItem("isOnline", "false");
+                  });
+                this.props.navigation.navigate("MapViewOffline", {
+                  showBlocked: true,
+                });
+              }
+            });
+          } else {
+            AsyncStorage.setItem("status", "active");
+            this.props.navigation.navigate("MapViewOffline", {
+              showBlocked: false,
+            });
+          }
+        }
+      }
+    });
+  };
+
+  handleAdminSuspend = async (data) => {
+    AsyncStorage.getItem("driverId").then((value) => {
+      if (value != "" && value !== null) {
+        if (data.id == value) {
+          if (data.status == "suspend") {
+            db.collection("driver_locations").doc(value).delete();
+            AsyncStorage.getItem("accesstoken").then((token) => {
+              if (token != "" && token !== null) {
+                fetch(DOMAIN + "api/driver/offline", {
+                  method: "GET",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: "Bearer " + token,
+                  },
+                })
+                  .then(function (response) {
+                    return response.json();
+                  })
+                  .then((result) => {
+                    console.log("offline", result);
+                    AsyncStorage.setItem("isOnline", "false");
+                  })
+                  .catch((e) => {
+                    AsyncStorage.setItem("isOnline", "false");
+                  });
+                this.props.navigation.navigate("MapViewOffline", {
+                  showSuspended: true,
+                });
+              }
+            });
+          } else {
+            // this.props.navigation.navigate("MapViewOffline", {
+            //   showSuspended: false,
+            // });
+          }
+        }
+      }
+    });
   };
 
   _checkDrivingTime = async () => {

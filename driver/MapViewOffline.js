@@ -40,8 +40,16 @@ import FlashMessage, {
 } from "react-native-flash-message";
 import Modal from "react-native-modal";
 import Spinner from "react-native-loading-spinner-overlay";
+import Pusher from "pusher-js/react-native";
 
-import { styles, theme, DOMAIN, changeMode, MapboxCustomURL } from "./Constant";
+import {
+  styles,
+  theme,
+  DOMAIN,
+  changeMode,
+  MapboxCustomURL,
+  PUSHER_API,
+} from "./Constant";
 
 import TopBar from "./TopBar";
 
@@ -189,6 +197,12 @@ export default class MapViewOffline extends React.Component {
         ],
       },
       airportCords: {},
+      showBlocked: props.route.params?.showBlocked
+        ? props.route.params.showBlocked
+        : false,
+      showSuspended: props.route.params?.showSuspended
+        ? props.route.params.showSuspended
+        : false,
     };
     this.myRefbt = React.createRef();
     //this.onChangeHandler = this.onChangeHandler.bind(this)
@@ -212,6 +226,46 @@ export default class MapViewOffline extends React.Component {
     }
   }
 
+  componentDidUpdate(prevProps) {
+    const prevNewData = prevProps.route.params?.showBlocked;
+    const newNewData = this.props.route.params?.showBlocked;
+
+    // Check if newData parameter has changed when navigating back
+    if (prevNewData !== newNewData) {
+      this.setState({ showBlocked: newNewData }, () => {});
+    }
+  }
+
+  handleAdminBlock = async (data) => {
+    console.log("amdin_block_channel", data);
+    AsyncStorage.getItem("driverId").then((value) => {
+      if (value != "" && value !== null) {
+        if (data.id == value) {
+          if (data.status == "blocked") {
+            this.setState({ showBlocked: true });
+          } else {
+            this.setState({ showBlocked: false });
+          }
+        }
+      }
+    });
+  };
+
+  handleAdminSuspend = async (data) => {
+    console.log("amdin_suspend_channel", data);
+    AsyncStorage.getItem("driverId").then((value) => {
+      if (value != "" && value !== null) {
+        if (data.id == value) {
+          if (data.status == "suspend") {
+            this.setState({ showSuspended: true });
+          } else {
+            this.setState({ showSuspended: false });
+          }
+        }
+      }
+    });
+  };
+
   async componentDidMount() {
     //console.log('offtopbar props',this.props)
     /*this.props.navigation.addListener('gestureEnd', this.onBackPress);
@@ -224,6 +278,13 @@ export default class MapViewOffline extends React.Component {
     //this.setState({width, height});
     //console.log(e.window)
     //})
+    var pusher = new Pusher(PUSHER_API.APP_KEY, {
+      cluster: PUSHER_API.APP_CLUSTER,
+    });
+    var channel = pusher.subscribe("turvy-channel");
+
+    channel.bind("admin_block_driver", this.handleAdminBlock);
+    channel.bind("admin_suspend_driver", this.handleAdminSuspend);
     this.getAirportsCoordsOnline();
     //console.log('routename',this.props.route.name)
     this.setState({
@@ -257,8 +318,14 @@ export default class MapViewOffline extends React.Component {
           })
           .then((res) => {
             //console.log('driver profile',res)
+            AsyncStorage.setItem(
+              "status",
+              res.data.is_active == 0 ? "blocked" : "active"
+            );
             this.setState({
               isDriverApproved: res.data.is_approved,
+              showBlocked: !res.data.is_active,
+              showSuspended: res.data.is_suspended,
             });
           });
       }
@@ -491,7 +558,7 @@ export default class MapViewOffline extends React.Component {
           return response.json();
         })
         .then((res) => {
-          //console.log('avialableDrivingTime mapview:',res.data);
+          console.log("avialableDrivingTime mapview:", res.data);
           if (res.status == 1) {
             if (res.data.driving_time == 0 && res.data.offlineTimeDiff > 0) {
               this.setState(
@@ -831,7 +898,77 @@ export default class MapViewOffline extends React.Component {
                 />
               </TouchableOpacity>
             </View>
-            {this.state.checkOnlineTime === 1 ? (
+            {this.state.showBlocked ? (
+              <TouchableOpacity
+                onPress={() => {}}
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  alignItems: "center",
+                  flex: 6,
+                  width: "100%",
+                  backgroundColor: "red",
+                }}
+              >
+                <View>
+                  <Title
+                    style={[
+                      stylesLocal.White,
+                      { alignSelf: "center", fontSize: 16 },
+                    ]}
+                  >
+                    Your Account Is Been
+                  </Title>
+                  <Text
+                    style={[
+                      stylesLocal.White,
+                      {
+                        alignSelf: "center",
+                        textAlign: "center",
+                        fontSize: 18,
+                      },
+                    ]}
+                  >
+                    Blocked
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ) : this.state.showSuspended ? (
+              <TouchableOpacity
+                onPress={() => {}}
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  alignItems: "center",
+                  flex: 6,
+                  width: "100%",
+                  backgroundColor: "#b58c8a",
+                }}
+              >
+                <View>
+                  <Title
+                    style={[
+                      stylesLocal.White,
+                      { alignSelf: "center", fontSize: 16 },
+                    ]}
+                  >
+                    Your Account Is Suspended
+                  </Title>
+                  <Text
+                    style={[
+                      stylesLocal.White,
+                      {
+                        alignSelf: "center",
+                        textAlign: "center",
+                        fontSize: 18,
+                      },
+                    ]}
+                  >
+                    Contact Support
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ) : this.state.checkOnlineTime === 1 ? (
               <View
                 style={{
                   justifyContent: "center",
