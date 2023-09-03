@@ -2333,9 +2333,9 @@ export default class BookingMap extends Component {
                   }}
                   onPress={() => this._arivePickUp()}
                 >
-                  <View style={{ justifyContent: "flex-start" }}>
+                  {/* <View style={{ justifyContent: "flex-start" }}>
                     <AntDesign name="arrowright" size={24} color="#FFF" />
-                  </View>
+                  </View> */}
                   <View
                     style={{
                       flex: 1,
@@ -2368,9 +2368,9 @@ export default class BookingMap extends Component {
                     }}
                     onPress={() => this._completeTrip()}
                   >
-                    <View style={{ justifyContent: "flex-start" }}>
+                    {/* <View style={{ justifyContent: "flex-start" }}>
                       <AntDesign name="arrowright" size={24} color="#FFF" />
-                    </View>
+                    </View> */}
                     <View
                       style={{
                         flex: 1,

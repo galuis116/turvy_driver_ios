@@ -1150,6 +1150,8 @@ PODS:
     - React-Core
   - react-native-safe-area-context (3.2.0):
     - React-Core
+  - react-native-tracking-transparency (0.1.2):
+    - React
   - react-native-viewpager (5.0.12):
     - React-Core
   - react-native-webview (11.6.2):
@@ -1372,6 +1374,7 @@ DEPENDENCIES:
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-otp-auto-fill (from `../node_modules/react-native-otp-auto-fill`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - react-native-tracking-transparency (from `../node_modules/react-native-tracking-transparency`)
   - react-native-viewpager (from `../node_modules/react-native-pager-view`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -1549,6 +1552,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-otp-auto-fill"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-tracking-transparency:
+    :path: "../node_modules/react-native-tracking-transparency"
   react-native-viewpager:
     :path: "../node_modules/react-native-pager-view"
   react-native-webview:
@@ -1694,6 +1699,7 @@ SPEC CHECKSUMS:
   react-native-netinfo: 42c0965fca99069b92e3f7360ab2d425985e5104
   react-native-otp-auto-fill: 722b3b99ddad3a2e92b6dacafdad6ab533e6ae2a
   react-native-safe-area-context: f0906bf8bc9835ac9a9d3f97e8bde2a997d8da79
+  react-native-tracking-transparency: 25ff1ff866e338c137c818bdec20526bb05ffcc1
   react-native-viewpager: 98a850d1c7ac6263122d82618a77062a5f427073
   react-native-webview: 193d233c29eacce1f42ca2637dab7ba79c25a6de
   React-perflogger: 1fb1ad5333b43a5137afd7608695f7a42c5efd27
