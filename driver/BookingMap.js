@@ -2961,6 +2961,7 @@ export default class BookingMap extends Component {
               handleMapBoxState={this.handleMapBoxState}
               handleDuration={this.handleDuration}
               isDeparted={this.state.departed}
+              driverId={this.state.driverId}
               handleTravlDist={this.handleTravlDist}
               waypoints={this.state.multidest}
               navCallFor={this.state.navCallFor}
