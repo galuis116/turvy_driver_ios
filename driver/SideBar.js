@@ -113,11 +113,13 @@ export default class SideBar extends Component {
           })
           .then((result) => {
             //console.log(result.data.count)
-            let msgCount = JSON.stringify(result.data.count);
-            AsyncStorage.setItem("msgCount", msgCount);
-            this.setState({
-              msgCount: msgCount,
-            });
+            if (result.data?.count) {
+              let msgCount = JSON.stringify(result.data.count);
+              AsyncStorage.setItem("msgCount", msgCount);
+              this.setState({
+                msgCount: msgCount,
+              });
+            }
             //AsyncStorage.setItem('isOnline', 'false');
           });
       }

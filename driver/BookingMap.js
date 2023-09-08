@@ -47,6 +47,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
+import Tts from "react-native-tts";
 import {
   DOMAIN,
   PUSHER_API,
@@ -294,6 +295,8 @@ export default class BookingMap extends Component {
     this.startPoint = [151.2195, -33.8688];
     this.finishedPoint = [151.2195, -33.8688];
     this.state = {
+      riderMessage: "",
+      showMessage: false,
       step: 1,
       locationcur: {},
       radius: 40,
@@ -441,6 +444,7 @@ export default class BookingMap extends Component {
       isBottomSheetOpen: true,
       modalSOSvisible: false,
       voiceNavigation: false,
+      voiceMessages: true,
       notifyRider: 0,
       chatMessage: {},
       messageText: "",
@@ -691,12 +695,26 @@ export default class BookingMap extends Component {
         if (value != "" && value !== null) {
           if (value == "true") {
             this.setState({
-              voiceNavigation: false,
+              voiceNavigation: true,
             });
           }
           if (value == "false") {
             this.setState({
-              voiceNavigation: true,
+              voiceNavigation: false,
+            });
+          }
+        }
+      });
+      await AsyncStorage.getItem("voiceMessages").then((value) => {
+        if (value != "" && value !== null) {
+          if (value == "true") {
+            this.setState({
+              voiceMessages: true,
+            });
+          }
+          if (value == "false") {
+            this.setState({
+              voiceMessages: false,
             });
           }
         }
@@ -1005,14 +1023,19 @@ export default class BookingMap extends Component {
             }) */
 
       //console.log('New message length=============>',remoteMessage)
-
+      if (this.state.voiceMessages) {
+        Tts.speak(
+          `New message from ${this.state.bookrequest.rider_name}, ${remoteMessage.data.body}`
+        );
+      }
       if (Object.keys(this.state.chatMessage).length <= 0) {
         let opt = [];
         opt[0] = remoteMessage.data;
         this.setState(
           {
             chatMessage: opt,
-            sendMessage: true,
+            riderMessage: remoteMessage.data.body,
+            showMessage: this.state.sendMessage ? false : true,
           },
           () => {
             //console.log('New message arrived!=============>',debug(this.state.chatMessage))
@@ -1022,13 +1045,17 @@ export default class BookingMap extends Component {
         this.setState(
           {
             chatMessage: [...this.state.chatMessage, ...[remoteMessage.data]],
-            sendMessage: true,
+            riderMessage: remoteMessage.data.body,
+            showMessage: this.state.sendMessage ? false : true,
           },
           () => {
             //console.log('New message arrived!=============>',debug(this.state.chatMessage))
           }
         );
       }
+      setTimeout(() => {
+        this.setState({ showMessage: false });
+      }, 10000);
       //console.log('New message arrived!=============>',debug(remoteMessage.data))
     });
   };
@@ -1659,9 +1686,13 @@ export default class BookingMap extends Component {
     let children = [];
     for (let j = 1; j <= 5; j++) {
       if (j <= this.state.riderRating) {
-        children.push(<Ionicons name="md-star" size={20} color="#fec557" />);
+        children.push(
+          <Ionicons name="md-star" key={j} size={20} color="#fec557" />
+        );
       } else {
-        children.push(<Ionicons name="md-star" size={20} color="#ccc" />);
+        children.push(
+          <Ionicons name="md-star" key={j} size={20} color="#ccc" />
+        );
       }
     }
     return children;
@@ -2003,7 +2034,7 @@ export default class BookingMap extends Component {
     <>
       <View
         style={{
-          backgroundColor: "white",
+          backgroundColor: "#e4e8e3",
           paddingHorizontal: 10,
           paddingVertical: 5,
           height: this.state.snapHeight,
@@ -2297,6 +2328,7 @@ export default class BookingMap extends Component {
               height: moderateScale(40),
               marginBottom: moderateScale(8),
               alignItems: "center",
+              paddingHorizontal: 20,
             }}
           >
             <Col size={12}>
@@ -2395,7 +2427,7 @@ export default class BookingMap extends Component {
           </Row>
           {!this.state.mapbox && (
             <>
-              <Row style={{ height: moderateScale(74) }}>
+              <Row style={{ height: moderateScale(74), paddingHorizontal: 20 }}>
                 <Col
                   size={3}
                   style={{ alignItems: "flex-start", justifyContent: "center" }}
@@ -2970,7 +3002,7 @@ export default class BookingMap extends Component {
                   ? true
                   : false
               }
-              mute={this.state.voiceNavigation}
+              mute={!this.state.voiceNavigation}
               isOtherNevigation={this.state.isOtherNevigation}
             />
           </>
@@ -3606,6 +3638,112 @@ export default class BookingMap extends Component {
             </View>
           </Modal>
         )}
+
+        {this.state.showMessage ? (
+          <View
+            style={{
+              position: "absolute",
+              zIndex: 100,
+              bottom: "0%",
+              alignItems: "center",
+              height: "auto",
+              backgroundColor: "white",
+              alignSelf: "center",
+              width: "95%",
+              paddingVertical: 15,
+              borderRadius: 30,
+              paddingBottom: 20,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                alignSelf: "flex-start",
+                marginLeft: 20,
+              }}
+            >
+              <Image
+                source={{ uri: this.state.avatar }}
+                style={{
+                  width: moderateScale(40),
+                  height: moderateScale(40),
+                  borderRadius: moderateScale(20),
+                }}
+                Resizemode={"contain"}
+              />
+              <Text style={{ fontSize: 16, paddingLeft: 20, color: "#55bd4d" }}>
+                From {this.state.bookrequest.rider_name}
+              </Text>
+            </View>
+            <Row
+              style={{
+                marginVertical: 10,
+                paddingRight: 50,
+                paddingLeft: 80,
+                alignItems: "center",
+              }}
+            >
+              <Col size={10}>
+                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                  {this.state.riderMessage}
+                </Text>
+              </Col>
+              <Col size={2} style={{ alignItems: "flex-end" }}>
+                <TouchableOpacity
+                  onPress={() =>
+                    this.setState({ showMessage: false, sendMessage: true })
+                  }
+                >
+                  <MaterialCommunityIcons
+                    size={24}
+                    color="#000"
+                    name={"chevron-right"}
+                  />
+                </TouchableOpacity>
+              </Col>
+            </Row>
+            <Divider />
+            <View
+              style={{
+                flexDirection: "row",
+                marginTop: 10,
+                marginHorizontal: -5,
+                flexWrap: "wrap",
+                justifyContent: "center",
+              }}
+            >
+              <TouchableOpacity
+                style={pageStyles.preDefineMsg}
+                onPress={() => {
+                  this._sendPreMessageToRider("I've arrived");
+                  this.setState({ showMessage: false });
+                }}
+              >
+                <Text style={{ color: "#000" }}>I've arrived</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={pageStyles.preDefineMsg}
+                onPress={() => {
+                  this._sendPreMessageToRider("OK Got it!");
+                  this.setState({ showMessage: false });
+                }}
+              >
+                <Text style={{ color: "#000" }}>OK Got it!</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={pageStyles.preDefineMsg}
+                onPress={() => {
+                  this._sendPreMessageToRider("I'm on my way");
+                  this.setState({ showMessage: false });
+                }}
+              >
+                <Text style={{ color: "#000" }}>I'm on my way</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : null}
 
         <Modal
           animationType="slide"

@@ -1312,6 +1312,8 @@ PODS:
   - RNSVG (12.1.1):
     - React-Core
   - Solar (2.1.0)
+  - TextToSpeech (4.1.0):
+    - React
   - Turf (1.2.0)
   - UMAppLoader (3.1.0)
   - Yoga (1.14.0)
@@ -1401,6 +1403,7 @@ DEPENDENCIES:
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
+  - TextToSpeech (from `../node_modules/react-native-tts`)
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1606,6 +1609,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-screens"
   RNSVG:
     :path: "../node_modules/react-native-svg"
+  TextToSpeech:
+    :path: "../node_modules/react-native-tts"
   UMAppLoader:
     :path: "../node_modules/unimodules-app-loader/ios"
   Yoga:
@@ -1727,6 +1732,7 @@ SPEC CHECKSUMS:
   RNScreens: 21b73c94c9117e1110a79ee0ee80c93ccefed8ce
   RNSVG: 0ff39850623301a540e69b0ccd9aabb2061812e3
   Solar: 2dc6e7cc39186cb0c8228fa08df76fb50c7d8f24
+  TextToSpeech: b3aa777ff5585705f179c0a2436bfd0926d1716e
   Turf: aaa060138b11a8e979a19e6d81091d156a31bc58
   UMAppLoader: 6185e8c45922f187002b85afae097961c4781df4
   Yoga: 75bf4b0131cfb46a659cd0c13309b79a6fcff66d
