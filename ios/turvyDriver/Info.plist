@@ -17,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.2.0</string>
+	<string>1.2.5</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -38,11 +38,9 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>120</string>
+	<string>125</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>We need your permission to track your data such as location and contact for app functionality.</string>
 	<key>MBXAccessToken</key>
 	<string>sk.eyJ1IjoiamttaWxsYSIsImEiOiJjbGlzM3JtMmswczN5M2NxdmR2cDB3bTNuIn0.vBo7vBXjCnpxsyHAwe4jZw</string>
 	<key>MGLMapboxAccessToken</key>
@@ -74,6 +72,8 @@
 	<string>Allow $(PRODUCT_NAME) to access your microphone</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow $(PRODUCT_NAME) to access your photos</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>We need your permission to track your data such as location and contact for app functionality.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Metropolis-Black.ttf</string>
