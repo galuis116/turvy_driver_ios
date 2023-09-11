@@ -21,6 +21,7 @@ import {
   SafeAreaView,
   TextInput as MyInput,
   Platform,
+  Modal as MyModal,
 } from "react-native";
 import {
   Provider as PaperProvider,
@@ -47,6 +48,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
+import Tts from "react-native-tts";
 import {
   DOMAIN,
   PUSHER_API,
@@ -294,6 +296,8 @@ export default class BookingMap extends Component {
     this.startPoint = [151.2195, -33.8688];
     this.finishedPoint = [151.2195, -33.8688];
     this.state = {
+      riderMessage: "",
+      showMessage: false,
       step: 1,
       locationcur: {},
       radius: 40,
@@ -441,6 +445,7 @@ export default class BookingMap extends Component {
       isBottomSheetOpen: true,
       modalSOSvisible: false,
       voiceNavigation: false,
+      voiceMessages: true,
       notifyRider: 0,
       chatMessage: {},
       messageText: "",
@@ -691,12 +696,26 @@ export default class BookingMap extends Component {
         if (value != "" && value !== null) {
           if (value == "true") {
             this.setState({
-              voiceNavigation: false,
+              voiceNavigation: true,
             });
           }
           if (value == "false") {
             this.setState({
-              voiceNavigation: true,
+              voiceNavigation: false,
+            });
+          }
+        }
+      });
+      await AsyncStorage.getItem("voiceMessages").then((value) => {
+        if (value != "" && value !== null) {
+          if (value == "true") {
+            this.setState({
+              voiceMessages: true,
+            });
+          }
+          if (value == "false") {
+            this.setState({
+              voiceMessages: false,
             });
           }
         }
@@ -1005,14 +1024,20 @@ export default class BookingMap extends Component {
             }) */
 
       //console.log('New message length=============>',remoteMessage)
-
+      if (this.state.voiceMessages) {
+        Tts.stop();
+        Tts.speak(
+          `New message from ${this.state.bookrequest.rider_name}, ${remoteMessage.data.body}`
+        );
+      }
       if (Object.keys(this.state.chatMessage).length <= 0) {
         let opt = [];
         opt[0] = remoteMessage.data;
         this.setState(
           {
             chatMessage: opt,
-            sendMessage: true,
+            riderMessage: remoteMessage.data.body,
+            showMessage: this.state.sendMessage ? false : true,
           },
           () => {
             //console.log('New message arrived!=============>',debug(this.state.chatMessage))
@@ -1022,13 +1047,17 @@ export default class BookingMap extends Component {
         this.setState(
           {
             chatMessage: [...this.state.chatMessage, ...[remoteMessage.data]],
-            sendMessage: true,
+            riderMessage: remoteMessage.data.body,
+            showMessage: this.state.sendMessage ? false : true,
           },
           () => {
             //console.log('New message arrived!=============>',debug(this.state.chatMessage))
           }
         );
       }
+      setTimeout(() => {
+        this.setState({ showMessage: false });
+      }, 10000);
       //console.log('New message arrived!=============>',debug(remoteMessage.data))
     });
   };
@@ -1659,9 +1688,13 @@ export default class BookingMap extends Component {
     let children = [];
     for (let j = 1; j <= 5; j++) {
       if (j <= this.state.riderRating) {
-        children.push(<Ionicons name="md-star" size={20} color="#fec557" />);
+        children.push(
+          <Ionicons name="md-star" key={j} size={20} color="#fec557" />
+        );
       } else {
-        children.push(<Ionicons name="md-star" size={20} color="#ccc" />);
+        children.push(
+          <Ionicons name="md-star" key={j} size={20} color="#ccc" />
+        );
       }
     }
     return children;
@@ -2003,7 +2036,7 @@ export default class BookingMap extends Component {
     <>
       <View
         style={{
-          backgroundColor: "white",
+          backgroundColor: "#e4e8e3",
           paddingHorizontal: 10,
           paddingVertical: 5,
           height: this.state.snapHeight,
@@ -2297,6 +2330,7 @@ export default class BookingMap extends Component {
               height: moderateScale(40),
               marginBottom: moderateScale(8),
               alignItems: "center",
+              paddingHorizontal: 20,
             }}
           >
             <Col size={12}>
@@ -2395,7 +2429,7 @@ export default class BookingMap extends Component {
           </Row>
           {!this.state.mapbox && (
             <>
-              <Row style={{ height: moderateScale(74) }}>
+              <Row style={{ height: moderateScale(74), paddingHorizontal: 20 }}>
                 <Col
                   size={3}
                   style={{ alignItems: "flex-start", justifyContent: "center" }}
@@ -2970,7 +3004,7 @@ export default class BookingMap extends Component {
                   ? true
                   : false
               }
-              mute={this.state.voiceNavigation}
+              mute={!this.state.voiceNavigation}
               isOtherNevigation={this.state.isOtherNevigation}
             />
           </>
@@ -3436,99 +3470,301 @@ export default class BookingMap extends Component {
                 } */}
 
         {this.state.sendMessage && (
-          <Modal
+          <MyModal
             animationType="slide"
             visible={this.state.sendMessage}
-            transparent={false}
+            style={{ height: 200, flex: 0 }}
+            onRequestClose={() => {
+              alert("Modal has been closed.");
+            }}
+          >
+            <>
+              <Appbar.Header
+                style={{
+                  backgroundColor: "#EEE",
+                  zIndex: 100,
+                }}
+              >
+                <AntDesign
+                  name="arrowleft"
+                  size={24}
+                  color="black"
+                  style={{ paddingLeft: 10 }}
+                  onPress={() => this.setState({ sendMessage: false })}
+                />
+                <Appbar.Content
+                  title={this.state.bookrequest.rider_name}
+                  titleStyle={{ textAlign: "center", alignContent: "center" }}
+                />
+              </Appbar.Header>
+              <View style={{ zIndex: 100, backgroundColor: "white" }}>
+                <Text
+                  style={{
+                    paddingVertical: 20,
+                    textAlign: "center",
+                  }}
+                >
+                  Keep your account safe - never share personal or account
+                  information in this chat
+                </Text>
+                <Divider />
+              </View>
+
+              <PaperProvider theme={theme}>
+                <KeyboardAvoidingView
+                  style={{
+                    position: "absolute",
+                    left: 10,
+                    right: 10,
+                    bottom: 10,
+                  }}
+                  behavior="padding"
+                  keyboardVerticalOffset={175}
+                >
+                  <View style={{ flex: 3, flexDirection: "row" }}>
+                    {Object.keys(chatMessage).length > 0 ? (
+                      <View
+                        style={{
+                          paddingTop: 20,
+                          width: "100%",
+                          paddingLeft: 10,
+                          paddingRight: 10,
+                        }}
+                      >
+                        {
+                          <FlatList
+                            inverted
+                            data={[...chatMessage].reverse()}
+                            renderItem={({ item, index }) => {
+                              return (
+                                <>
+                                  {item.messageFrom != "Rider" ? (
+                                    <View
+                                      style={{
+                                        marginTop: 10,
+                                        width: "90%",
+                                        marginLeft: "10%",
+                                      }}
+                                    >
+                                      <View
+                                        style={{
+                                          backgroundColor: "#135AA8",
+                                          paddingHorizontal: 10,
+                                          paddingVertical: 8,
+                                          borderRadius: 20,
+                                          alignSelf: "flex-end",
+                                        }}
+                                      >
+                                        <Text style={{ color: "#fff" }}>
+                                          {item.body}
+                                        </Text>
+                                      </View>
+                                    </View>
+                                  ) : (
+                                    <View
+                                      style={{
+                                        marginTop: 10,
+                                        width: "90%",
+                                        marginRight: "10%",
+                                      }}
+                                    >
+                                      <View
+                                        style={{
+                                          backgroundColor: "#dedede",
+                                          paddingHorizontal: 10,
+                                          paddingVertical: 8,
+                                          borderRadius: 20,
+                                          alignSelf: "flex-start",
+                                        }}
+                                      >
+                                        <Text style={{ color: "#000" }}>
+                                          {item.body}
+                                        </Text>
+                                      </View>
+                                    </View>
+                                  )}
+                                </>
+                              );
+                            }}
+                          />
+                        }
+                      </View>
+                    ) : (
+                      <></>
+                    )}
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      marginTop: 10,
+                      marginHorizontal: -5,
+                      flexWrap: "wrap",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <TouchableOpacity
+                      style={pageStyles.preDefineMsg}
+                      onPress={() =>
+                        this._sendPreMessageToRider("I've arrived")
+                      }
+                    >
+                      <Text style={{ color: "#000" }}>I've arrived</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={pageStyles.preDefineMsg}
+                      onPress={() => this._sendPreMessageToRider("OK Got it!")}
+                    >
+                      <Text style={{ color: "#000" }}>OK Got it!</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={pageStyles.preDefineMsg}
+                      onPress={() =>
+                        this._sendPreMessageToRider("I'm on my way")
+                      }
+                    >
+                      <Text style={{ color: "#000" }}>I'm on my way</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={pageStyles.inputcontainer}>
+                    <TextInput
+                      placeholder="Message"
+                      style={pageStyles.input}
+                      right={
+                        <TextInput.Icon
+                          icon="send"
+                          onPress={() => this._sendMessageToRider()}
+                        />
+                      }
+                      // onChangeText={(text) => this.setState({ message: text })}
+                      // value={this.state.email}
+                      underlineColor="transparent"
+                      theme={{
+                        colors: { text: "black", primary: "transparent" },
+                      }}
+                      underlineColorAndroid="transparent"
+                      value={this.state.messageText}
+                      onChangeText={(value) =>
+                        this.setState({ messageText: value }, () => {
+                          if (value !== "") {
+                            this.setState({
+                              messageError: "",
+                            });
+                          }
+                        })
+                      }
+                    />
+
+                    {this.state.messageError !== "" ? (
+                      <Row style={{ marginHorizontal: moderateScale(10) }}>
+                        <Col
+                          style={{
+                            alignItems: "flex-start",
+                            justifyContent: "flex-start",
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontSize: moderateScale(14),
+                              color: "red",
+                            }}
+                          >
+                            {this.state.messageError}
+                          </Text>
+                        </Col>
+                      </Row>
+                    ) : null}
+                    {this.state.messageSuccess !== "" ? (
+                      <Row style={{ marginHorizontal: moderateScale(10) }}>
+                        <Col
+                          style={{
+                            alignItems: "flex-start",
+                            justifyContent: "flex-start",
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontSize: moderateScale(14),
+                              color: "green",
+                            }}
+                          >
+                            {this.state.messageSuccess}
+                          </Text>
+                        </Col>
+                      </Row>
+                    ) : null}
+                  </View>
+                </KeyboardAvoidingView>
+              </PaperProvider>
+            </>
+          </MyModal>
+        )}
+
+        {this.state.showMessage ? (
+          <View
+            style={{
+              position: "absolute",
+              zIndex: 100,
+              bottom: "0%",
+              alignItems: "center",
+              height: "auto",
+              backgroundColor: "white",
+              alignSelf: "center",
+              width: "95%",
+              paddingVertical: 15,
+              borderRadius: 30,
+              paddingBottom: 20,
+            }}
           >
             <View
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                paddingTop: 50,
+                justifyContent: "flex-start",
+                alignSelf: "flex-start",
+                marginLeft: 20,
               }}
             >
-              <TouchableOpacity
-                onPress={() => this.setState({ sendMessage: false })}
-              >
-                <AntDesign name="arrowleft" size={24} color="#000" />
-              </TouchableOpacity>
-              <View>
-                <Text style={{ fontSize: 22, paddingLeft: 20 }}>
-                  {this.state.bookrequest.rider_name}
-                </Text>
-              </View>
+              <Image
+                source={{ uri: this.state.avatar }}
+                style={{
+                  width: moderateScale(40),
+                  height: moderateScale(40),
+                  borderRadius: moderateScale(20),
+                }}
+                Resizemode={"contain"}
+              />
+              <Text style={{ fontSize: 16, paddingLeft: 20, color: "#55bd4d" }}>
+                From {this.state.bookrequest.rider_name}
+              </Text>
             </View>
-            <Text style={{ paddingVertical: 20, textAlign: "center" }}>
-              Keep your account safe - never share personal or account
-              information in this chat
-            </Text>
+            <Row
+              style={{
+                marginVertical: 10,
+                paddingRight: 50,
+                paddingLeft: 80,
+                alignItems: "center",
+              }}
+            >
+              <Col size={10}>
+                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                  {this.state.riderMessage}
+                </Text>
+              </Col>
+              <Col size={2} style={{ alignItems: "flex-end" }}>
+                <TouchableOpacity
+                  onPress={() =>
+                    this.setState({ showMessage: false, sendMessage: true })
+                  }
+                >
+                  <MaterialCommunityIcons
+                    size={24}
+                    color="#000"
+                    name={"chevron-right"}
+                  />
+                </TouchableOpacity>
+              </Col>
+            </Row>
             <Divider />
-            <SafeAreaView style={{ flex: 7, backgroundColor: "#fff" }}>
-              <View style={{ flexDirection: "row" }}>
-                {Object.keys(chatMessage).length > 0 && (
-                  <View style={{ flex: 1 }}>
-                    {
-                      <FlatList
-                        data={[...chatMessage].reverse()}
-                        inverted
-                        renderItem={({ item, index }) => {
-                          return (
-                            <>
-                              {item.messageFrom != "Rider" ? (
-                                <View
-                                  style={{
-                                    marginTop: 10,
-                                    width: "90%",
-                                    marginLeft: "10%",
-                                  }}
-                                >
-                                  <View
-                                    style={{
-                                      backgroundColor: "#135AA8",
-                                      paddingHorizontal: 10,
-                                      paddingVertical: 8,
-                                      borderRadius: 20,
-                                      alignSelf: "flex-end",
-                                    }}
-                                  >
-                                    <Text style={{ color: "#fff" }}>
-                                      {item.body}
-                                    </Text>
-                                  </View>
-                                </View>
-                              ) : (
-                                <View
-                                  style={{
-                                    marginTop: 10,
-                                    width: "90%",
-                                    marginRight: "10%",
-                                  }}
-                                >
-                                  <View
-                                    style={{
-                                      backgroundColor: "#dedede",
-                                      paddingHorizontal: 10,
-                                      paddingVertical: 8,
-                                      borderRadius: 20,
-                                      alignSelf: "flex-start",
-                                    }}
-                                  >
-                                    <Text style={{ color: "#000" }}>
-                                      {item.body}
-                                    </Text>
-                                  </View>
-                                </View>
-                              )}
-                            </>
-                          );
-                        }}
-                      />
-                    }
-                  </View>
-                )}
-              </View>
-            </SafeAreaView>
             <View
               style={{
                 flexDirection: "row",
@@ -3540,72 +3776,34 @@ export default class BookingMap extends Component {
             >
               <TouchableOpacity
                 style={pageStyles.preDefineMsg}
-                onPress={() => this._sendPreMessageToRider("I've arrived")}
+                onPress={() => {
+                  this._sendPreMessageToRider("I've arrived");
+                  this.setState({ showMessage: false });
+                }}
               >
                 <Text style={{ color: "#000" }}>I've arrived</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={pageStyles.preDefineMsg}
-                onPress={() => this._sendPreMessageToRider("OK Got it!")}
+                onPress={() => {
+                  this._sendPreMessageToRider("OK Got it!");
+                  this.setState({ showMessage: false });
+                }}
               >
                 <Text style={{ color: "#000" }}>OK Got it!</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={pageStyles.preDefineMsg}
-                onPress={() => this._sendPreMessageToRider("I'm on my way")}
+                onPress={() => {
+                  this._sendPreMessageToRider("I'm on my way");
+                  this.setState({ showMessage: false });
+                }}
               >
                 <Text style={{ color: "#000" }}>I'm on my way</Text>
               </TouchableOpacity>
             </View>
-            <View style={pageStyles.inputcontainer}>
-              <View style={{ flex: 5 }}>
-                <MyInput
-                  mode="flat"
-                  style={{
-                    height: 45,
-                    borderWidth: 1,
-                    borderColor: "#ccc",
-                    borderRadius: 50,
-                    paddingHorizontal: 10,
-                    elevation: 1,
-                    backgroundColor: "#FFF",
-                  }}
-                  underlineColor="none"
-                  placeholder="Message..."
-                  placeholderTextColor="#000"
-                  underlineColorAndroid="transparent"
-                  value={this.state.messageText}
-                  onChangeText={(value) =>
-                    this.setState({ messageText: value }, () => {
-                      if (value !== "") {
-                        this.setState({
-                          messageError: "",
-                        });
-                      }
-                    })
-                  }
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <TouchableOpacity
-                  style={{
-                    borderRadius: 50,
-                    backgroundColor: "#135AA8",
-                    width: 45,
-                    height: 45,
-                    justifyContent: "center",
-                    alignSelf: "flex-end",
-                    alignItems: "center",
-                    elevation: 1,
-                  }}
-                  onPress={() => this._sendMessageToRider()}
-                >
-                  <MaterialIcons name="send" size={24} color="#FFF" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
-        )}
+          </View>
+        ) : null}
 
         <Modal
           animationType="slide"
@@ -3827,16 +4025,16 @@ const pageStyles = StyleSheet.create({
     borderColor: "gray",
     width: "100%",
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 50,
     padding: 0,
     height: 50,
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
   },
   inputcontainer: {
+    padding: 20,
     flex: 1,
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 5,
   },
   preDefineMsg: {
     borderRadius: 50,

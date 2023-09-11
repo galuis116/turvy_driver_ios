@@ -39,25 +39,25 @@ export default class LocationEnableScreen extends React.Component {
     } else {
       // Tracking is not authorized; handle accordingly.
       console.log("trackingPermission_notAuthorized");
-      showMessage({
-        message:
-          "Permission for tracking user data is not allowed. Please allow tracking for app use in settings",
-        type: "danger",
-        color: "#ffffff", // text color
-        hideOnPress: true,
-        animated: true,
-        duration: 8000,
-        icon: "danger",
-        floating: true,
-        statusBarHeight: false,
-        style: {
-          alignContent: "center",
-          justifyContent: "center",
-          marginTop: 30,
-          alignItems: "center",
-        },
-      });
-      this.denyAccess();
+      // showMessage({
+      //   message:
+      //     "Permission for tracking user data is not allowed. Please allow tracking for app use in settings",
+      //   type: "danger",
+      //   color: "#ffffff", // text color
+      //   hideOnPress: true,
+      //   animated: true,
+      //   duration: 8000,
+      //   icon: "danger",
+      //   floating: true,
+      //   statusBarHeight: false,
+      //   style: {
+      //     alignContent: "center",
+      //     justifyContent: "center",
+      //     marginTop: 30,
+      //     alignItems: "center",
+      //   },
+      // });
+      // this.denyAccess();
     }
   }
 

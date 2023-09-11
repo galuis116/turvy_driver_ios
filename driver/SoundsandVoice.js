@@ -59,7 +59,7 @@ export default class SoundsandVoice extends Component {
       }
     });
 
-    await AsyncStorage.getItem("messages").then((value) => {
+    await AsyncStorage.getItem("voiceMessages").then((value) => {
       if (value != "" && value !== null) {
         if (value == "true") {
           this.setState({
@@ -97,9 +97,9 @@ export default class SoundsandVoice extends Component {
       },
       () => {
         if (this.state.messages) {
-          AsyncStorage.setItem("messages", "true");
+          AsyncStorage.setItem("voiceMessages", "true");
         } else {
-          AsyncStorage.setItem("messages", "false");
+          AsyncStorage.setItem("voiceMessages", "false");
         }
       }
     );
