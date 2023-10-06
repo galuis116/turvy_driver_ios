@@ -772,7 +772,7 @@ export default class MapViewFirst extends React.Component {
               width: "100%",
               paddingHorizontal: 20,
               borderRadius: 5,
-              height: 65,
+              height: 85,
             },
           ]}
         >

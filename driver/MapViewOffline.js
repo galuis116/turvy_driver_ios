@@ -876,7 +876,7 @@ export default class MapViewOffline extends React.Component {
               {
                 width: "100%",
                 backgroundColor: "#3f78ba",
-                height: 85,
+                height: 100,
                 paddingHorizontal: 20,
               },
             ]}

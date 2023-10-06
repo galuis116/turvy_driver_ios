@@ -22,6 +22,7 @@ import {
   TextInput as MyInput,
   Platform,
   Modal as MyModal,
+  TouchableWithoutFeedback,
 } from "react-native";
 import {
   Provider as PaperProvider,
@@ -440,8 +441,8 @@ export default class BookingMap extends Component {
       riderWaiting: 0,
       waitTimeStart: 0,
       waitTimeStop: 0,
-      snapHeight: Platform.isPad ? 450 : 300,
-      snapPoints: Platform.isPad ? [450, 78] : [300, 68],
+      snapHeight: Platform.isPad ? 450 : 330,
+      snapPoints: Platform.isPad ? [450, 78] : [330, 68],
       isBottomSheetOpen: true,
       modalSOSvisible: false,
       voiceNavigation: false,
@@ -519,8 +520,8 @@ export default class BookingMap extends Component {
           mapbox: false,
           riderWaiting: 120,
           tripStatus: "arivepickup",
-          snapHeight: Platform.isPad ? 450 : 300,
-          snapPoints: Platform.isPad ? [450, 78] : [300, 68],
+          snapHeight: Platform.isPad ? 450 : 330,
+          snapPoints: Platform.isPad ? [450, 78] : [330, 68],
         },
         () => {
           this.riderWaiting();
@@ -1302,8 +1303,8 @@ export default class BookingMap extends Component {
           mapboxSrc: this.state.driverLocation,
           mapboxDst: this.state.origin,
           navCallFor: "pickup",
-          snapHeight: Platform.isPad ? 300 : 200,
-          snapPoints: Platform.isPad ? [300, 200] : [200, 120],
+          snapHeight: Platform.isPad ? 330 : 150,
+          snapPoints: Platform.isPad ? [330, 200] : [150, 80],
         },
         () => {
           this.setState({
@@ -1319,7 +1320,7 @@ export default class BookingMap extends Component {
           mapboxDst: this.state.destination,
           navCallFor: "destination",
           snapHeight: Platform.isPad ? 250 : 150,
-          snapPoints: Platform.isPad ? [250, 100] : [150, 140],
+          snapPoints: Platform.isPad ? [250, 100] : [150, 80],
         },
         () => {
           this.setState({
@@ -1437,8 +1438,8 @@ export default class BookingMap extends Component {
       this.setState(
         {
           tripStatus: "arivepickup",
-          snapHeight: 300,
-          snapPoints: [300, 68],
+          snapHeight: 330,
+          snapPoints: [330, 68],
         },
         () => {
           //this.riderWaiting()
@@ -2043,186 +2044,555 @@ export default class BookingMap extends Component {
           elevation: 8,
         }}
       >
-        <Grid>
-          <Row
-            style={{
-              height: moderateScale(60),
-              marginBottom: moderateScale(8),
-              alignItems: "center",
-            }}
-          >
-            <Col size={2}>
-              {this.state.mapbox && this.state.navCallFor == "pickup" && (
-                <TouchableOpacity onPress={() => this.handleMapBoxState()}>
-                  <AntDesign name="arrowleft" size={24} color="#000" />
-                </TouchableOpacity>
-              )}
-            </Col>
-            {this.state.riderWaiting > 0 && !this.state.mapbox ? (
-              <Col size={9}>
-                <View
-                  style={{ justifyContent: "center", alignItems: "center" }}
-                >
-                  <View>
-                    <Text style={styles.pickText}>Waiting for rider</Text>
-                  </View>
-                  <View>
-                    <Text style={styles.pickText}>
-                      {secondsToHms(this.state.riderWaiting)}
-                    </Text>
-                  </View>
-                </View>
-              </Col>
-            ) : this.state.waitTimeStop === 1 && !this.state.mapbox ? (
-              <Col size={9}>
-                <View
-                  style={{ justifyContent: "center", alignItems: "center" }}
-                >
-                  <View>
-                    <Text style={styles.pickText}>Charge waiting time</Text>
-                  </View>
-                  <View>
-                    <Text style={[styles.pickText, { color: "#62CD32" }]}>
-                      {secondsToHms(this.state.waitTimeStart)}
-                    </Text>
-                  </View>
-                </View>
-              </Col>
-            ) : (
-              <Col size={9}>
-                {this.state.distanceRemaining && (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text style={styles.pickText}>
-                      {this.state.durationRemaining}
-                    </Text>
-                    {this.state.navCallFor != "destination" ? (
-                      <FontAwesome5 name="user-alt" size={13} color="#62CD32" />
-                    ) : (
-                      <FontAwesome5 name="user-alt" size={13} color="#E8202A" />
-                    )}
-                    <Text style={styles.pickText}>
-                      {this.state.distanceRemaining}
-                    </Text>
-                  </View>
-                )}
-                {this.state.navCallFor == "pickup" ? (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text style={styles.pickText}>
-                      Picking up {this.state.bookrequest.rider_name}
-                    </Text>
-                  </View>
-                ) : this.state.navCallFor == "destination" ? (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text style={styles.pickText}>
-                      Dropping off {this.state.bookrequest.rider_name}
-                    </Text>
-                  </View>
-                ) : (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text style={styles.pickText}>
-                      Picking up {this.state.bookrequest.rider_name}
-                    </Text>
-                  </View>
+        <TouchableWithoutFeedback
+          onPress={() => {
+            if (this.state.mapbox) {
+              this.setState(
+                {
+                  snapIndex: this.state.snapIndex ? 0 : 1,
+                },
+                () => {
+                  this.bottomSheetRef.current.snapTo(this.state.snapIndex);
+                }
+              );
+            }
+          }}
+        >
+          <Grid>
+            <Row
+              style={{
+                height: moderateScale(60),
+                marginBottom: moderateScale(8),
+                alignItems: "center",
+              }}
+            >
+              <Col size={2}>
+                {this.state.mapbox && this.state.navCallFor == "pickup" && (
+                  <TouchableOpacity onPress={() => this.handleMapBoxState()}>
+                    <AntDesign name="arrowleft" size={24} color="#000" />
+                  </TouchableOpacity>
                 )}
               </Col>
-            )}
-            <Col size={2} style={{ alignItems: "center" }}></Col>
-          </Row>
-
-          {this.state.mapbox && (
-            <>
-              <Row
-                style={{
-                  height: 70,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Col
-                  style={{
-                    width: this.state.navCallFor == "pickup" ? "80%" : "50%",
-                  }}
-                >
-                  <Row
-                    style={{
-                      justifyContent: "center",
-                      alignItems: "center",
-                      marginVertical: 5,
-                    }}
+              {this.state.riderWaiting > 0 && !this.state.mapbox ? (
+                <Col size={9}>
+                  <View
+                    style={{ justifyContent: "center", alignItems: "center" }}
                   >
-                    <Col
-                      size={3}
+                    <View>
+                      <Text style={styles.pickText}>Waiting for rider</Text>
+                    </View>
+                    <View>
+                      <Text style={styles.pickText}>
+                        {secondsToHms(this.state.riderWaiting)}
+                      </Text>
+                    </View>
+                  </View>
+                </Col>
+              ) : this.state.waitTimeStop === 1 && !this.state.mapbox ? (
+                <Col size={9}>
+                  <View
+                    style={{ justifyContent: "center", alignItems: "center" }}
+                  >
+                    <View>
+                      <Text style={styles.pickText}>Charge waiting time</Text>
+                    </View>
+                    <View>
+                      <Text style={[styles.pickText, { color: "#62CD32" }]}>
+                        {secondsToHms(this.state.waitTimeStart)}
+                      </Text>
+                    </View>
+                  </View>
+                </Col>
+              ) : (
+                <Col size={9}>
+                  {this.state.distanceRemaining && (
+                    <View
                       style={{
-                        margin: moderateScale(8),
-                        height: moderateScale(52),
-                        alignItems: "center",
+                        flexDirection: "row",
                         justifyContent: "center",
+                        alignItems: "center",
                       }}
                     >
+                      <Text style={styles.pickText}>
+                        {this.state.durationRemaining}
+                      </Text>
+                      {this.state.navCallFor != "destination" ? (
+                        <FontAwesome5
+                          name="user-alt"
+                          size={13}
+                          color="#62CD32"
+                        />
+                      ) : (
+                        <FontAwesome5
+                          name="user-alt"
+                          size={13}
+                          color="#E8202A"
+                        />
+                      )}
+                      <Text style={styles.pickText}>
+                        {this.state.distanceRemaining}
+                      </Text>
+                    </View>
+                  )}
+                  {this.state.navCallFor == "pickup" ? (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text style={styles.pickText}>
+                        Picking up {this.state.bookrequest.rider_name}
+                      </Text>
+                    </View>
+                  ) : this.state.navCallFor == "destination" ? (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text style={styles.pickText}>
+                        Dropping off {this.state.bookrequest.rider_name}
+                      </Text>
+                    </View>
+                  ) : (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text style={styles.pickText}>
+                        Picking up {this.state.bookrequest.rider_name}
+                      </Text>
+                    </View>
+                  )}
+                </Col>
+              )}
+              <Col size={2} style={{ alignItems: "center" }}></Col>
+            </Row>
+
+            {this.state.mapbox && (
+              <>
+                <Row
+                  style={{
+                    height: 70,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Col
+                    style={{
+                      width: this.state.navCallFor == "pickup" ? "80%" : "50%",
+                    }}
+                  >
+                    <Row
+                      style={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginBottom: 10,
+                      }}
+                    >
+                      <Col
+                        size={3}
+                        style={{
+                          margin: moderateScale(8),
+                          height: moderateScale(52),
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <View
+                          style={{
+                            flex: 1,
+                            backgroundColor: "#62CD32",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            borderRadius: moderateScale(5),
+                            width: 65,
+                          }}
+                        >
+                          {this.state.navCallFor == "pickup" ? (
+                            <TouchableOpacity
+                              onPress={() => this.openDialScreen()}
+                            >
+                              <Feather
+                                name="phone-call"
+                                size={moderateScale(16)}
+                                color="white"
+                              />
+                              <Text style={{ color: "#fff", fontSize: 12 }}>
+                                Call
+                              </Text>
+                            </TouchableOpacity>
+                          ) : (
+                            <TouchableOpacity
+                              onPress={() => this.openSOSModalScreen()}
+                            >
+                              <Feather
+                                name="phone-call"
+                                size={moderateScale(16)}
+                                color="white"
+                              />
+                              <Text style={{ color: "#fff", fontSize: 12 }}>
+                                SOS
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                      </Col>
+                      {this.state.navCallFor == "pickup" && (
+                        <Col
+                          size={3}
+                          style={{
+                            margin: moderateScale(8),
+                            height: 55,
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <View
+                            style={{
+                              flex: 1,
+                              backgroundColor: "#135AA8",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              borderRadius: moderateScale(5),
+                              width: 65,
+                            }}
+                          >
+                            <TouchableOpacity
+                              onPress={() => this._sendMessage()}
+                              style={{
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <AntDesign
+                                name="message1"
+                                size={moderateScale(18)}
+                                color="white"
+                              />
+                              <Text style={{ color: "#fff", fontSize: 12 }}>
+                                Message
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        </Col>
+                      )}
+                      {this.state.tripStatus !== "completeTrip" ? (
+                        <Col
+                          size={3}
+                          style={{
+                            margin: moderateScale(8),
+                            height: 55,
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <View
+                            style={{
+                              flex: 1,
+                              backgroundColor: "#E8202A",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              borderRadius: moderateScale(5),
+                              width: 65,
+                            }}
+                          >
+                            {this.state.navCallFor == "pickup" ? (
+                              <TouchableOpacity
+                                onPress={() => this.cancelTripAlert()}
+                                style={{
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <AntDesign
+                                  name="closecircleo"
+                                  size={moderateScale(18)}
+                                  color="white"
+                                />
+                                <Text style={{ color: "#fff", fontSize: 12 }}>
+                                  Cancel
+                                </Text>
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => this.alertViolentEndTrip()}
+                                style={{
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <AntDesign
+                                  name="closecircleo"
+                                  size={moderateScale(18)}
+                                  color="white"
+                                />
+                                <Text style={{ color: "#fff", fontSize: 12 }}>
+                                  End Trip
+                                </Text>
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                        </Col>
+                      ) : null}
+                    </Row>
+                  </Col>
+                </Row>
+              </>
+            )}
+
+            <Row
+              style={{
+                height: moderateScale(40),
+                marginBottom: moderateScale(8),
+                alignItems: "center",
+                paddingHorizontal: 20,
+              }}
+            >
+              <Col size={12}>
+                {this.state.tripStatus === "navpickup" ? (
+                  <TouchableOpacity
+                    onPress={() => this._navToPickUp()}
+                    style={styles.navigateBtn}
+                  >
+                    <View style={{ flexDirection: "row" }}>
+                      <View>
+                        <MaterialCommunityIcons
+                          name="navigation"
+                          size={18}
+                          color="#FFF"
+                        />
+                      </View>
+                      <View>
+                        <Text style={{ color: "#FFF", fontSize: 12 }}>
+                          NAVIGATE
+                        </Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                ) : this.state.tripStatus === "arivepickup" ? (
+                  <TouchableOpacity
+                    style={{
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: "#135AA8",
+                      flexDirection: "row",
+                      borderRadius: 5,
+                      paddingHorizontal: 10,
+                      paddingVertical: 8,
+                    }}
+                    onPress={() => this._arivePickUp()}
+                  >
+                    {/* <View style={{ justifyContent: "flex-start" }}>
+                    <AntDesign name="arrowright" size={24} color="#FFF" />
+                  </View> */}
+                    <View
+                      style={{
+                        flex: 1,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: "#FFF",
+                          fontSize: 16,
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Start {this.state.bookrequest.servicetype_name}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ) : (
+                  this.state.tripStatus === "arivedesination" && (
+                    <TouchableOpacity
+                      style={{
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "#E8202A",
+                        flexDirection: "row",
+                        borderRadius: 5,
+                        paddingHorizontal: 10,
+                        paddingVertical: 8,
+                      }}
+                      onPress={() => this._completeTrip()}
+                    >
+                      {/* <View style={{ justifyContent: "flex-start" }}>
+                      <AntDesign name="arrowright" size={24} color="#FFF" />
+                    </View> */}
                       <View
                         style={{
                           flex: 1,
-                          backgroundColor: "#62CD32",
-                          alignItems: "center",
                           justifyContent: "center",
-                          borderRadius: moderateScale(5),
-                          width: 65,
+                          alignItems: "center",
                         }}
                       >
-                        {this.state.navCallFor == "pickup" ? (
-                          <TouchableOpacity
-                            onPress={() => this.openDialScreen()}
-                          >
-                            <Feather
-                              name="phone-call"
-                              size={moderateScale(16)}
-                              color="white"
-                            />
-                            <Text style={{ color: "#fff", fontSize: 12 }}>
-                              Call
-                            </Text>
-                          </TouchableOpacity>
-                        ) : (
-                          <TouchableOpacity
-                            onPress={() => this.openSOSModalScreen()}
-                          >
-                            <Feather
-                              name="phone-call"
-                              size={moderateScale(16)}
-                              color="white"
-                            />
-                            <Text style={{ color: "#fff", fontSize: 12 }}>
-                              SOS
-                            </Text>
-                          </TouchableOpacity>
-                        )}
+                        <Text
+                          style={{
+                            color: "#FFF",
+                            fontSize: 16,
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Complete {this.state.bookrequest.servicetype_name}
+                        </Text>
                       </View>
-                    </Col>
-                    {this.state.navCallFor == "pickup" && (
+                    </TouchableOpacity>
+                  )
+                )}
+              </Col>
+            </Row>
+            {!this.state.mapbox && (
+              <>
+                <Row
+                  style={{ height: moderateScale(74), paddingHorizontal: 20 }}
+                >
+                  <Col
+                    size={3}
+                    style={{
+                      alignItems: "flex-start",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: moderateScale(70),
+                        borderWidth: moderateScale(1),
+                        borderColor: "silver",
+                        borderRadius: moderateScale(5),
+                        overflow: "hidden",
+                      }}
+                    >
+                      <TouchableHighlight
+                        onLongPress={this._onLongPressButton}
+                        underlayColor="white"
+                      >
+                        <Image
+                          source={{ uri: this.state.avatar }}
+                          style={{
+                            width: moderateScale(70),
+                            height: moderateScale(70),
+                          }}
+                          Resizemode={"contain"}
+                        />
+                      </TouchableHighlight>
+                    </View>
+                  </Col>
+                  <Col
+                    size={8}
+                    style={{
+                      alignItems: "flex-start",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Row
+                      style={{
+                        height: moderateScale(30),
+                        alignItems: "center",
+                      }}
+                    >
+                      <Col size={10}>
+                        <Text
+                          style={{
+                            fontSize: moderateScale(20),
+                            color: "#135AA8",
+                          }}
+                        >
+                          {this.state.bookrequest.rider_name}
+                        </Text>
+                      </Col>
+                      <Col size={2} style={{ alignItems: "flex-end" }}>
+                        <Text
+                          style={{
+                            fontSize: moderateScale(14),
+                            color: "#135AA8",
+                          }}
+                        >
+                          {this.state.riderRating}
+                        </Text>
+                      </Col>
+                    </Row>
+                    <Row
+                      style={{
+                        height: moderateScale(35),
+                        alignItems: "center",
+                      }}
+                    >
+                      {this.createTable()}
+                    </Row>
+                  </Col>
+                </Row>
+                <Row
+                  style={{
+                    height: 70,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Col style={{ width: "80%" }}>
+                    <Row
+                      style={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginVertical: 5,
+                      }}
+                    >
+                      <Col
+                        size={3}
+                        style={{
+                          margin: moderateScale(8),
+                          height: moderateScale(52),
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <View
+                          style={{
+                            flex: 1,
+                            backgroundColor: "#62CD32",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            borderRadius: moderateScale(5),
+                            width: 65,
+                          }}
+                        >
+                          {this.state.navCallFor == "pickup" ? (
+                            <TouchableOpacity
+                              onPress={() => this.openDialScreen()}
+                            >
+                              <Feather
+                                name="phone-call"
+                                size={moderateScale(16)}
+                                color="white"
+                              />
+                              <Text style={{ color: "#fff", fontSize: 12 }}>
+                                Call
+                              </Text>
+                            </TouchableOpacity>
+                          ) : (
+                            <TouchableOpacity
+                              onPress={() => this.openSOSModalScreen()}
+                            >
+                              <Feather
+                                name="phone-call"
+                                size={moderateScale(16)}
+                                color="white"
+                              />
+                              <Text style={{ color: "#fff", fontSize: 12 }}>
+                                SOS
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                      </Col>
                       <Col
                         size={3}
                         style={{
@@ -2260,419 +2630,90 @@ export default class BookingMap extends Component {
                           </TouchableOpacity>
                         </View>
                       </Col>
-                    )}
-                    {this.state.tripStatus !== "completeTrip" ? (
-                      <Col
-                        size={3}
-                        style={{
-                          margin: moderateScale(8),
-                          height: 55,
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <View
+                      {this.state.tripStatus !== "completeTrip" ? (
+                        <Col
+                          size={3}
                           style={{
-                            flex: 1,
-                            backgroundColor: "#E8202A",
+                            margin: moderateScale(8),
+                            height: 55,
                             alignItems: "center",
                             justifyContent: "center",
-                            borderRadius: moderateScale(5),
-                            width: 65,
                           }}
                         >
-                          {this.state.navCallFor == "pickup" ? (
-                            <TouchableOpacity
-                              onPress={() => this.cancelTripAlert()}
-                              style={{
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <AntDesign
-                                name="closecircleo"
-                                size={moderateScale(18)}
-                                color="white"
-                              />
-                              <Text style={{ color: "#fff", fontSize: 12 }}>
-                                Cancel
-                              </Text>
-                            </TouchableOpacity>
-                          ) : (
-                            <TouchableOpacity
-                              onPress={() => this.alertViolentEndTrip()}
-                              style={{
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <AntDesign
-                                name="closecircleo"
-                                size={moderateScale(18)}
-                                color="white"
-                              />
-                              <Text style={{ color: "#fff", fontSize: 12 }}>
-                                End Trip
-                              </Text>
-                            </TouchableOpacity>
-                          )}
-                        </View>
-                      </Col>
-                    ) : null}
-                  </Row>
-                </Col>
-              </Row>
-            </>
-          )}
-
-          <Row
-            style={{
-              height: moderateScale(40),
-              marginBottom: moderateScale(8),
-              alignItems: "center",
-              paddingHorizontal: 20,
-            }}
-          >
-            <Col size={12}>
-              {this.state.tripStatus === "navpickup" ? (
-                <TouchableOpacity
-                  onPress={() => this._navToPickUp()}
-                  style={styles.navigateBtn}
-                >
-                  <View style={{ flexDirection: "row" }}>
-                    <View>
-                      <MaterialCommunityIcons
-                        name="navigation"
-                        size={18}
-                        color="#FFF"
-                      />
-                    </View>
-                    <View>
-                      <Text style={{ color: "#FFF", fontSize: 12 }}>
-                        NAVIGATE
-                      </Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              ) : this.state.tripStatus === "arivepickup" ? (
-                <TouchableOpacity
+                          <View
+                            style={{
+                              flex: 1,
+                              backgroundColor: "#E8202A",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              borderRadius: moderateScale(5),
+                              width: 65,
+                            }}
+                          >
+                            {this.state.navCallFor == "pickup" ? (
+                              <TouchableOpacity
+                                onPress={() => this.cancelTripAlert()}
+                                style={{
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <AntDesign
+                                  name="closecircleo"
+                                  size={moderateScale(18)}
+                                  color="white"
+                                />
+                                <Text style={{ color: "#fff", fontSize: 12 }}>
+                                  Cancel
+                                </Text>
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => this.alertViolentEndTrip()}
+                                style={{
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <AntDesign
+                                  name="closecircleo"
+                                  size={moderateScale(18)}
+                                  color="white"
+                                />
+                                <Text style={{ color: "#fff", fontSize: 12 }}>
+                                  End Trip
+                                </Text>
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                        </Col>
+                      ) : null}
+                    </Row>
+                  </Col>
+                </Row>
+                <Row
                   style={{
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: "#135AA8",
-                    flexDirection: "row",
-                    borderRadius: 5,
-                    paddingHorizontal: 10,
-                    paddingVertical: 8,
+                    height: moderateScale(30),
+                    padding: moderateScale(6),
                   }}
-                  onPress={() => this._arivePickUp()}
                 >
-                  {/* <View style={{ justifyContent: "flex-start" }}>
-                    <AntDesign name="arrowright" size={24} color="#FFF" />
-                  </View> */}
-                  <View
-                    style={{
-                      flex: 1,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: "#FFF",
-                        fontSize: 16,
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      Start {this.state.bookrequest.servicetype_name}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              ) : (
-                this.state.tripStatus === "arivedesination" && (
-                  <TouchableOpacity
-                    style={{
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: "#E8202A",
-                      flexDirection: "row",
-                      borderRadius: 5,
-                      paddingHorizontal: 10,
-                      paddingVertical: 8,
-                    }}
-                    onPress={() => this._completeTrip()}
-                  >
-                    {/* <View style={{ justifyContent: "flex-start" }}>
-                      <AntDesign name="arrowright" size={24} color="#FFF" />
-                    </View> */}
-                    <View
-                      style={{
-                        flex: 1,
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: "#FFF",
-                          fontSize: 16,
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        Complete {this.state.bookrequest.servicetype_name}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                )
-              )}
-            </Col>
-          </Row>
-          {!this.state.mapbox && (
-            <>
-              <Row style={{ height: moderateScale(74), paddingHorizontal: 20 }}>
-                <Col
-                  size={3}
-                  style={{ alignItems: "flex-start", justifyContent: "center" }}
-                >
-                  <View
-                    style={{
-                      width: moderateScale(70),
-                      borderWidth: moderateScale(1),
-                      borderColor: "silver",
-                      borderRadius: moderateScale(5),
-                      overflow: "hidden",
-                    }}
-                  >
-                    <TouchableHighlight
-                      onLongPress={this._onLongPressButton}
-                      underlayColor="white"
-                    >
-                      <Image
-                        source={{ uri: this.state.avatar }}
-                        style={{
-                          width: moderateScale(70),
-                          height: moderateScale(70),
-                        }}
-                        Resizemode={"contain"}
+                  <Col size={1}>
+                    <View style={styles.inforound}>
+                      <MaterialCommunityIcons
+                        name="information-variant"
+                        size={moderateScale(20)}
+                        color="black"
                       />
-                    </TouchableHighlight>
-                  </View>
-                </Col>
-                <Col
-                  size={8}
-                  style={{ alignItems: "flex-start", justifyContent: "center" }}
-                >
-                  <Row
-                    style={{ height: moderateScale(30), alignItems: "center" }}
-                  >
-                    <Col size={10}>
-                      <Text
-                        style={{
-                          fontSize: moderateScale(20),
-                          color: "#135AA8",
-                        }}
-                      >
-                        {this.state.bookrequest.rider_name}
-                      </Text>
-                    </Col>
-                    <Col size={2} style={{ alignItems: "flex-end" }}>
-                      <Text
-                        style={{
-                          fontSize: moderateScale(14),
-                          color: "#135AA8",
-                        }}
-                      >
-                        {this.state.riderRating}
-                      </Text>
-                    </Col>
-                  </Row>
-                  <Row
-                    style={{ height: moderateScale(35), alignItems: "center" }}
-                  >
-                    {this.createTable()}
-                  </Row>
-                </Col>
-              </Row>
-              <Row
-                style={{
-                  height: 70,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Col style={{ width: "80%" }}>
-                  <Row
-                    style={{
-                      justifyContent: "center",
-                      alignItems: "center",
-                      marginVertical: 5,
-                    }}
-                  >
-                    <Col
-                      size={3}
-                      style={{
-                        margin: moderateScale(8),
-                        height: moderateScale(52),
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <View
-                        style={{
-                          flex: 1,
-                          backgroundColor: "#62CD32",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          borderRadius: moderateScale(5),
-                          width: 65,
-                        }}
-                      >
-                        {this.state.navCallFor == "pickup" ? (
-                          <TouchableOpacity
-                            onPress={() => this.openDialScreen()}
-                          >
-                            <Feather
-                              name="phone-call"
-                              size={moderateScale(16)}
-                              color="white"
-                            />
-                            <Text style={{ color: "#fff", fontSize: 12 }}>
-                              Call
-                            </Text>
-                          </TouchableOpacity>
-                        ) : (
-                          <TouchableOpacity
-                            onPress={() => this.openSOSModalScreen()}
-                          >
-                            <Feather
-                              name="phone-call"
-                              size={moderateScale(16)}
-                              color="white"
-                            />
-                            <Text style={{ color: "#fff", fontSize: 12 }}>
-                              SOS
-                            </Text>
-                          </TouchableOpacity>
-                        )}
-                      </View>
-                    </Col>
-                    <Col
-                      size={3}
-                      style={{
-                        margin: moderateScale(8),
-                        height: 55,
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <View
-                        style={{
-                          flex: 1,
-                          backgroundColor: "#135AA8",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          borderRadius: moderateScale(5),
-                          width: 65,
-                        }}
-                      >
-                        <TouchableOpacity
-                          onPress={() => this._sendMessage()}
-                          style={{
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <AntDesign
-                            name="message1"
-                            size={moderateScale(18)}
-                            color="white"
-                          />
-                          <Text style={{ color: "#fff", fontSize: 12 }}>
-                            Message
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    </Col>
-                    {this.state.tripStatus !== "completeTrip" ? (
-                      <Col
-                        size={3}
-                        style={{
-                          margin: moderateScale(8),
-                          height: 55,
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <View
-                          style={{
-                            flex: 1,
-                            backgroundColor: "#E8202A",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            borderRadius: moderateScale(5),
-                            width: 65,
-                          }}
-                        >
-                          {this.state.navCallFor == "pickup" ? (
-                            <TouchableOpacity
-                              onPress={() => this.cancelTripAlert()}
-                              style={{
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <AntDesign
-                                name="closecircleo"
-                                size={moderateScale(18)}
-                                color="white"
-                              />
-                              <Text style={{ color: "#fff", fontSize: 12 }}>
-                                Cancel
-                              </Text>
-                            </TouchableOpacity>
-                          ) : (
-                            <TouchableOpacity
-                              onPress={() => this.alertViolentEndTrip()}
-                              style={{
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <AntDesign
-                                name="closecircleo"
-                                size={moderateScale(18)}
-                                color="white"
-                              />
-                              <Text style={{ color: "#fff", fontSize: 12 }}>
-                                End Trip
-                              </Text>
-                            </TouchableOpacity>
-                          )}
-                        </View>
-                      </Col>
-                    ) : null}
-                  </Row>
-                </Col>
-              </Row>
-              <Row
-                style={{ height: moderateScale(30), padding: moderateScale(6) }}
-              >
-                <Col size={1}>
-                  <View style={styles.inforound}>
-                    <MaterialCommunityIcons
-                      name="information-variant"
-                      size={moderateScale(20)}
-                      color="black"
-                    />
-                  </View>
-                </Col>
-                <Col size={11}>
-                  <Text>Long press on image to zoom in</Text>
-                </Col>
-              </Row>
-            </>
-          )}
-        </Grid>
+                    </View>
+                  </Col>
+                  <Col size={11}>
+                    <Text>Long press on image to zoom in</Text>
+                  </Col>
+                </Row>
+              </>
+            )}
+          </Grid>
+        </TouchableWithoutFeedback>
       </View>
     </>
   );
