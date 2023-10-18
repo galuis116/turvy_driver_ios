@@ -560,7 +560,7 @@ export default class BookingMap extends Component {
         this.setState(
           {
             snapHeight: 250,
-            snapPoints: [250, 140, 68],
+            snapPoints: [250, 120, 68],
             snapIndex: 0,
             tripStatus: "arivedesination",
           },
@@ -664,6 +664,10 @@ export default class BookingMap extends Component {
           this.chargeWaitTimer = setTimeout(() => {
             this.chargeWaitTimeStart();
           }, 1000);
+        }
+        if (this.state.waitTimeStart >= 300) {
+          this.clearWaitTimer();
+          // this.alertViolentEndTrip();
         }
       }
     );
@@ -1264,7 +1268,7 @@ export default class BookingMap extends Component {
         return response.json();
       })
       .then((result) => {
-        //console.log('make call:',result)
+        console.log("make call:", result);
         let number = "";
         if (Platform.OS === "ios") {
           number = "telprompt:${" + result.senderphn + "}";
@@ -1303,8 +1307,8 @@ export default class BookingMap extends Component {
           mapboxSrc: this.state.driverLocation,
           mapboxDst: this.state.origin,
           navCallFor: "pickup",
-          snapHeight: Platform.isPad ? 330 : 150,
-          snapPoints: Platform.isPad ? [330, 200] : [150, 80],
+          snapHeight: Platform.isPad ? 330 : 200,
+          snapPoints: Platform.isPad ? [330, 200] : [200, 120],
         },
         () => {
           this.setState({
@@ -1319,8 +1323,8 @@ export default class BookingMap extends Component {
           mapboxSrc: this.state.driverLocation,
           mapboxDst: this.state.destination,
           navCallFor: "destination",
-          snapHeight: Platform.isPad ? 250 : 150,
-          snapPoints: Platform.isPad ? [250, 100] : [150, 80],
+          snapHeight: Platform.isPad ? 250 : 200,
+          snapPoints: Platform.isPad ? [250, 100] : [200, 120],
         },
         () => {
           this.setState({
@@ -1660,6 +1664,7 @@ export default class BookingMap extends Component {
       body: JSON.stringify({
         reason: this.state.cancelReason,
         rider_id: this.state.bookrequest.rider_id,
+        waitingTime: this.state.waitTimeStart,
       }),
     })
       .then(function (response) {
@@ -1719,30 +1724,30 @@ export default class BookingMap extends Component {
   };
 
   cancelTripAlert = () => {
-    Alert.alert(
-      "Hold on!",
-      "Are you sure to cancel? A $15 cancellation fee apply.",
-      [
-        {
-          text: "No",
-          onPress: () => null,
-          style: "cancel",
+    let alert_string =
+      this.state.waitTimeStart >= 300
+        ? "Are you sure to cancel? You will get $15 cancellation charge and waiting charge"
+        : "Are you sure to cancel? A $15 cancellation fee apply.";
+    Alert.alert("Hold on!", alert_string, [
+      {
+        text: "No",
+        onPress: () => null,
+        style: "cancel",
+      },
+      {
+        text: "YES",
+        onPress: () => {
+          this.setState(
+            {
+              cancelModal: true,
+            },
+            () => {
+              this.setState({ cancelError: "", cancelSuccess: "" });
+            }
+          );
         },
-        {
-          text: "YES",
-          onPress: () => {
-            this.setState(
-              {
-                cancelModal: true,
-              },
-              () => {
-                this.setState({ cancelError: "", cancelSuccess: "" });
-              }
-            );
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
 
   toRadians = (degrees) => {
@@ -2061,7 +2066,9 @@ export default class BookingMap extends Component {
           <Grid>
             <Row
               style={{
-                height: moderateScale(60),
+                height: this.state.mapbox
+                  ? moderateScale(100)
+                  : moderateScale(60),
                 marginBottom: moderateScale(8),
                 alignItems: "center",
               }}
@@ -2069,7 +2076,7 @@ export default class BookingMap extends Component {
               <Col size={2}>
                 {this.state.mapbox && this.state.navCallFor == "pickup" && (
                   <TouchableOpacity onPress={() => this.handleMapBoxState()}>
-                    <AntDesign name="arrowleft" size={24} color="#000" />
+                    <AntDesign name="arrowleft" size={28} color="#000" />
                   </TouchableOpacity>
                 )}
               </Col>
@@ -2113,23 +2120,23 @@ export default class BookingMap extends Component {
                         alignItems: "center",
                       }}
                     >
-                      <Text style={styles.pickText}>
+                      <Text style={styles.navigationPickText}>
                         {this.state.durationRemaining}
                       </Text>
                       {this.state.navCallFor != "destination" ? (
                         <FontAwesome5
                           name="user-alt"
-                          size={13}
+                          size={20}
                           color="#62CD32"
                         />
                       ) : (
                         <FontAwesome5
                           name="user-alt"
-                          size={13}
+                          size={18}
                           color="#E8202A"
                         />
                       )}
-                      <Text style={styles.pickText}>
+                      <Text style={styles.navigationPickText}>
                         {this.state.distanceRemaining}
                       </Text>
                     </View>
@@ -2142,7 +2149,7 @@ export default class BookingMap extends Component {
                         alignItems: "center",
                       }}
                     >
-                      <Text style={styles.pickText}>
+                      <Text style={styles.navigationPickText}>
                         Picking up {this.state.bookrequest.rider_name}
                       </Text>
                     </View>
@@ -2154,7 +2161,7 @@ export default class BookingMap extends Component {
                         alignItems: "center",
                       }}
                     >
-                      <Text style={styles.pickText}>
+                      <Text style={styles.navigationPickText}>
                         Dropping off {this.state.bookrequest.rider_name}
                       </Text>
                     </View>
@@ -3981,6 +3988,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     fontWeight: "bold",
     color: "#303030",
+  },
+  navigationPickText: {
+    paddingHorizontal: 10,
+    fontWeight: "bold",
+    color: "#303030",
+    fontSize: 20,
   },
 });
 

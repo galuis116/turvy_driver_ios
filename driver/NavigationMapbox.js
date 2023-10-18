@@ -27,6 +27,7 @@ export default class NavigationMapbox extends React.Component {
 
     this.state = {
       origin: this.props.origin,
+      old_position: this.props.origin,
       destination: this.props.dest ? this.props.dest : null,
       bookId: this.props.book_id,
       heading: 0,
@@ -72,9 +73,37 @@ export default class NavigationMapbox extends React.Component {
     }
   };
 
-  locationChange = (event) => {
-    const { latitude, longitude, bearing, speedLimit } = event.nativeEvent;
+  // Converts from degrees to radians.
+  toRadians = (degrees) => {
+    return (degrees * Math.PI) / 180;
+  };
 
+  // Converts from radians to degrees.
+  toDegrees = (radians) => {
+    return (radians * 180) / Math.PI;
+  };
+
+  getHeading = (origin, destination) => {
+    const originLat = this.toRadians(origin.latitude);
+    const originLng = this.toRadians(origin.longitude);
+    const destLat = this.toRadians(destination.latitude);
+    const destLng = this.toRadians(destination.longitude);
+
+    const y = Math.sin(destLng - originLng) * Math.cos(destLat);
+    const x =
+      Math.cos(originLat) * Math.sin(destLat) -
+      Math.sin(originLat) * Math.cos(destLat) * Math.cos(destLng - originLng);
+    const heading = this.toDegrees(Math.atan2(y, x));
+    return (heading + 360) % 360;
+  };
+
+  locationChange = (event) => {
+    const { latitude, longitude, speedLimit } = event.nativeEvent;
+    let bearing = 0;
+    let new_position = { latitude, longitude };
+    bearing = this.getHeading(this.state.old_position, new_position);
+    this.setState({ old_position: new_position });
+    console.log("bearing", bearing);
     //let sp = speedLimit.split(',')[0]
     //sp = sp.split('=')[1]
     //console.log('speedLimit==============', speedLimit, sp)
